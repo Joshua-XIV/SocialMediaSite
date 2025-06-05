@@ -2,8 +2,8 @@ import express from 'express'
 import {pool as db} from '../database.js'
 const router = express.Router();
 
-// Get all posts
-router.get('/', async(req, res) => {
+// Test of getting posts
+router.get('/test', async(req, res) => {
   try {
     const result = await db.query(`SELECT * FROM "user"`);
     res.json(result.rows);
@@ -13,7 +13,8 @@ router.get('/', async(req, res) => {
   }
 });
 
-router.post('/', async(req, res) => {
+// Make post request
+router.post('/create', async(req, res) => {
   if (!req.body) {
     return res.status(400).json({ error: "Request body is missing" });
   }
