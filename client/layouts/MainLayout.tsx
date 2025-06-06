@@ -8,13 +8,18 @@ import SideBar from '../components/SideBar'
 
 const MainLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(true);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+  const [theme, setTheme] = useState< 0 | 1 >(() => {
     // Load from localStorage or default to 'light'
-    return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+    const saved = localStorage.getItem('theme');
+    if (saved === '0' || saved === '1') {
+      return Number(saved) as 0 | 1;
+    }
+    return 1; // default to dark
   });
 
+  // Set on theme change
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('theme', theme.toString());
   }, [theme]);
 
   return (

@@ -2,7 +2,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const HomePage = () => {
   const { theme } = useTheme();
-  const textColor = theme === 'light' ? 'text-black' : 'text-white';
+  const textColor = theme === 0 ? 'text-black' : 'text-white';
   
   return (
     <div className={`${textColor} text-9xl px-6`}>

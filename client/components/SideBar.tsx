@@ -8,9 +8,9 @@ interface SideBarProps {
 
 const SideBar = ({action, sideBarOpen} : SideBarProps) => {
   const { theme } = useTheme();
-  const bgColor = theme === 'light' ? 'bg-white' : 'bg-black';
-  const textColor = theme === 'light' ? 'text-black' : 'text-white';
-  const borderColor = theme === 'light' ? 'border-black' : 'border-white/50'
+  const bgColor = theme === 0 ? 'bg-white' : 'bg-black';
+  const textColor = theme === 0 ? 'text-black' : 'text-white';
+  const borderColor = theme === 0 ? 'border-black' : 'border-white/50'
   
   return (
     <div 
