@@ -1,5 +1,8 @@
 const errorHandler = (err, req, res, next) => {
-  res.status(404).json({msg: "Error"});
+    console.error(err);
+    res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error'
+  });
 };
 
 export default errorHandler;

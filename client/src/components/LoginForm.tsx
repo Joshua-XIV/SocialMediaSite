@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LoginSignUpInput from "./LoginSignUpInput"
 import { useThemeStyles } from "../hooks/useThemeStyles";
+import { login } from "../api/auth";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -9,17 +10,26 @@ interface LoginFormProps {
 const LoginForm = ({onClose} : LoginFormProps) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const { borderColor, textColor, hoverColor } = useThemeStyles();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email/Username:", emailOrUsername);
-    console.log("Password:", password);
+    setError("");
+
+    try {
+      const user = await login(emailOrUsername, password);
+      // TODO: Set an auth state?
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
     <form className="z-20 px-[4rem] mt-[6rem]" onSubmit={handleSubmit}>
+      {error && <div className="text-red-500 mb-1">{error}</div>}
       <div className="space-y-5">
         <LoginSignUpInput
           placeholder="Email or Username"
