@@ -6,11 +6,11 @@ interface SideBarProps {
 }
 
 const SideBar = ({ action, sideBarOpen }: SideBarProps) => {
-  const { bgColor, textColor, borderColor, backgroundLayer } = useThemeStyles();
+  const { textColor, borderColor, backgroundLayer } = useThemeStyles();
 
   return (
     <div
-      className={`fixed h-[calc(100vh-4rem)] ${borderColor} border-r-2 ${textColor}`}
+      className={`fixed h-[calc(100vh-3rem)] ${borderColor} border-r-2 ${textColor}`}
       style={{
         width: sideBarOpen ? "16rem" : "4rem",
         transition: "width 0.5s ease",

@@ -4,7 +4,12 @@ import CogButton from "./CogButton";
 import SunImage from "../assets/sun.svg";
 import MoonImage from "../assets/moon.svg";
 
-const CogWindow = () => {
+interface CogWindowProps {
+  openLogin: () => void;
+  closeWindow: () => void;
+}
+
+const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
   const { theme, setTheme } = useTheme();
   const { bgColor, textColor } = useThemeStyles();
 
@@ -12,16 +17,14 @@ const CogWindow = () => {
     setTheme(theme === 0 ? 1 : 0);
   };
 
-  const handleLogin = () => {};
-
   const handleSettings = () => {};
 
   return (
     <div
-      className={`fixed mt-[1.5rem] mr-[1rem] right-0 flex flex-col justify-center items-center ${textColor} rounded-2xl p-2 shadow`}
+      className={`fixed mt-[1.5rem] mr-[1rem] right-0 flex flex-col justify-center items-center ${textColor} rounded-2xl p-2 shadow space-y-1`}
       style={{backgroundColor : bgColor }}
     >
-      <CogButton onClick={handleLogin} text="Login/Sign-Up" />
+      <CogButton onClick={ () => {openLogin(); closeWindow();}} text="Login/Sign-Up" />
       <CogButton onClick={handleSettings} text="Settings" />
       <div className="flex justify-center items-center space-x-1">
         <img src={SunImage} className="w-5 h-5"></img>

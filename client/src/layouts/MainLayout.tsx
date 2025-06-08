@@ -25,7 +25,7 @@ const MainLayout = () => {
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <Background />
       <NavBar />
-      <div className="pt-[4em]">
+      <div className="pt-[3em]">
         {
           <SideBar
             action={() => setSideBarOpen((prev) => !prev)}

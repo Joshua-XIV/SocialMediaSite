@@ -1,5 +1,8 @@
 import express from 'express'
 import {pool as db} from '../database.js'
+import bcrypt from 'bcrypt'
+
+const saltRounds = 10;
 const router = express.Router();
 
 // Test of getting posts
@@ -14,23 +17,28 @@ router.get('/test', async(req, res) => {
 });
 
 // Make post request
-router.post('/create', async(req, res) => {
+router.post('/create-account', async(req, res) => {
   if (!req.body) {
     return res.status(400).json({ error: "Request body is missing" });
   }
 
-  const {username, display_name, email, password_hash} = req.body;
+  const {username, display_name, email, password} = req.body;
   const missingField = [];
   if (!username) missingField.push("Username");
+  if (username.length > 20) return res.status(400).json({ error: "Username can't be longer than 20 characters"});
   if (!display_name) missingField.push("Display Name");
+  if (display_name.length > 40) return res.status(400).json({ error: "Display Name can't be longer than 40 characters"});
   if (!email) missingField.push("Email");
-  if (!password_hash) missingField.push("Password");
+  if (!password) missingField.push("Password");
+  if (password.length > 64) return res.status(400).json({ error: "Password can't be longer than 64 characters"});
 
   if (missingField.length > 0) {
-  return res.status(400).json({error: `Missing required fields: ${missingField.join(", ")}`});
+    return res.status(400).json({error: `Missing required fields: ${missingField.join(", ")}`});
   }
 
   try {
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
     const post = await db.query(`INSERT INTO "user" (username, display_name, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING *`,
       [username, display_name, email, password_hash]
     );
