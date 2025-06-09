@@ -39,7 +39,7 @@ async function tryRefreshAccessToken(refreshToken, res) {
 
   // Check DB if refresh token is valid
   const result = await db.query(
-    `SELECT * FROM refresh_tokens WHERE token = $1 AND user_id = $2`,
+    `SELECT * FROM refresh_token WHERE token = $1 AND user_id = $2`,
     [refreshToken, payload.id]
   );
 

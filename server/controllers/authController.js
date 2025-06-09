@@ -11,6 +11,7 @@ export const createUser = async(req, res, next) => {
     return next(new HttpError('Request body is missing', 400));
   }
 
+  // Check Fields for creating account
   const {username, display_name, email, password} = req.body;
   const missingField = [];
   if (!username) missingField.push("Username");
@@ -25,6 +26,7 @@ export const createUser = async(req, res, next) => {
     return next(new HttpError(`Missing required fields: ${missingField.join(", ")}`, 400));
   }
 
+  // Insert user into db
   try {
     const password_hash = await bcrypt.hash(password, saltRounds);
 
@@ -63,6 +65,7 @@ export const loginUser = async (req, res, next) => {
     return next(new HttpError("Missing Fields(s)", 403));
   }
 
+  // Check credentials from db
   try {
     const userResult = await db.query(
       `SELECT * FROM "user" WHERE username = $1 OR email = $1 LIMIT 1`,
@@ -85,10 +88,11 @@ export const loginUser = async (req, res, next) => {
     const refreshToken = generateRefreshToken(userPayload);
 
     await db.query(
-      `INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
+      `INSERT INTO refresh_token (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
       [refreshToken, user.id]
     )
 
+    // Set cookies for tokens
     setAuthCookies(res, accessToken, refreshToken);
 
     return res.status(200).json({
@@ -105,17 +109,19 @@ export const refreshTokenHandler = async (req, res, next) => {
   const token = req.cookies.refreshToken;
   if (!token) return next(new HttpError("No Token Provided", 401));
 
+  // Check for refresh token to give access token 
   try {
     const payload = verifyRefreshToken(token);
 
     const result =  await db.query(
-      `SELECT * FROM refresh_tokens WHERE token = $1 AND user_id = $2`,
+      `SELECT * FROM refresh_token WHERE token = $1 AND user_id = $2`,
       [token, payload.id]
     );
 
     if (result.rows.length === 0) return next(new HttpError("Invalid Token", 403));
 
     const newAccessToken = generateAccessToken({ id: payload.id, username: payload.username});
+    setAuthCookies(res, newAccessToken);
     return res.json({ accessToken: newAccessToken });
   } catch (err) {
     return next(new HttpError("Invalid or Expired Token", 403));
@@ -123,8 +129,9 @@ export const refreshTokenHandler = async (req, res, next) => {
 }
 
 export const logoutUser = async (req, res) => {
+  // Clear all tokens from cookies
   const token = req.cookies.refreshToken;
-  await db.query(`DELETE FROM refresh_tokens WHERE token = $1`, [token]);
+  await db.query(`DELETE FROM refresh_token WHERE token = $1`, [token]);
   clearAuthCookies(res);
   res.sendStatus(204);
 }

@@ -1,3 +1,4 @@
+// Sets both access and refresh tokens in cookies
 export const setAuthCookies = (res, accessToken, refreshToken) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
@@ -14,6 +15,7 @@ export const setAuthCookies = (res, accessToken, refreshToken) => {
   });
 }
 
+// Sets only access token in cookies
 export const setAccessAuthCookies = (res, accessToken) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
@@ -23,6 +25,7 @@ export const setAccessAuthCookies = (res, accessToken) => {
   });
 }
 
+// Clears tokens from cookies
 export const clearAuthCookies = (res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");

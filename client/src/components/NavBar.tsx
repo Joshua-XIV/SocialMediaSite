@@ -4,12 +4,16 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from '../contexts/AuthContext';
 import CogWindow from "./CogWindow";
 import CloseIcon from '../assets/close.svg?react';
 import LoginForm from './LoginForm';
 
+// Starting to become Div & Effect Soup, need to just refactor and put some stuff into components
+
 const NavBar = () => {
   const { theme } = useTheme();
+  const { isLoggedIn } = useAuth();
   const { bgColor, bgAntiColor, textColor, borderColor, hoverColor, popupColor } = useThemeStyles();
   const [openCog, setOpenCog] = useState(false);
   const [renderCog, setRenderCog] = useState(false);
@@ -34,7 +38,7 @@ const NavBar = () => {
 
     const handleClickOutside = (event: MouseEvent) => {
       if (cogRef.current && !cogRef.current.contains(event.target as Node)) {
-        setOpenCog(false);
+        toggleCog();
       }
     };
 
@@ -75,8 +79,12 @@ const NavBar = () => {
                   z-10 flex justify-between items-center px-6 space-x-2 ${textColor}`}
         style={{backgroundColor : bgColor }}
       >
-        <div className="">HOME</div>
-        <div className={`${borderColor} border-2 px-3 py-0.5 rounded-3xl w-2xs sm:w-xs md:w-md`}>
+        <div>
+          <button className={`hover:cursor-pointer ${borderColor} border-2 px-2 rounded-xl bg-gray-400/30 hover:bg-gray-400/60`}>
+            HOME
+          </button>
+        </div>
+        <div className={`${borderColor} border-2 px-3 py-0.5 rounded-3xl w-2xs sm:w-xs md:w-md opacity-80 hover:opacity-100`}>
             <input 
               type="text" 
               placeholder="Search..." 
@@ -85,7 +93,12 @@ const NavBar = () => {
             />
         </div>
         <div className="space-x-6 flex">
-          <button className="hover:cursor-pointer" onClick={() => setOpenLogin(true)}>LOGIN</button>
+          {!isLoggedIn && <button 
+            className={`hover:cursor-pointer ${borderColor} border-2 px-2 rounded-xl bg-gray-400/30 hover:bg-gray-400/60`} 
+            onClick={() => setOpenLogin(true)}
+          >
+              LOGIN
+          </button>}
           <div className="relative" ref={cogRef}>
             <FontAwesomeIcon
               icon={faCog}

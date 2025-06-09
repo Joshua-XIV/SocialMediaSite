@@ -2,12 +2,14 @@ import { useState } from "react";
 import LoginSignUpInput from "./LoginSignUpInput"
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { login } from "../api/auth";
+import { useAuth } from "../contexts/AuthContext";
 
 interface LoginFormProps {
   onClose: () => void;
 }
 
 const LoginForm = ({onClose} : LoginFormProps) => {
+  const { setIsLoggedIn } = useAuth();
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,8 +21,8 @@ const LoginForm = ({onClose} : LoginFormProps) => {
     setError("");
 
     try {
-      const user = await login(emailOrUsername, password);
-      // TODO: Set an auth state?
+      await login(emailOrUsername, password);
+      setIsLoggedIn(true);
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -40,6 +42,7 @@ const LoginForm = ({onClose} : LoginFormProps) => {
           placeholder="Password"
           value={password}
           onChange={setPassword}
+          isPrivate={true}
         />
       </div>
       <div className={`ml-2 mt-4 ${textColor} text-[13px] space-y-2`}>
@@ -52,14 +55,14 @@ const LoginForm = ({onClose} : LoginFormProps) => {
       <div className="flex flex-row justify-between mx-2">
         <button 
           onClick={onClose}
-          className={`left-0 mt-4 px-4 py-2 rounded bg-red-600 text-white cursor-pointer ${borderColor} 
+          className={`left-0 mt-4 px-4 py-2 rounded bg-red-600 ${textColor} cursor-pointer ${borderColor} 
                       border-1 shadow opacity-80 hover:opacity-100 w-[5rem] text-center`}
         >
           Cancel
         </button>             
         <button 
           type="submit" 
-          className={`left-0 mt-4 px-4 py-2 rounded text-white border-1 shadow text-center w-[5rem] ${borderColor} 
+          className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
                       ${(!password || !emailOrUsername)? '' : 'hover:cursor-pointer'}
                       ${(!password || !emailOrUsername) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
                       ${(!password || !emailOrUsername) ? hoverColor : 'bg-blue-600'}`}
