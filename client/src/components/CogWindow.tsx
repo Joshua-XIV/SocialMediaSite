@@ -14,7 +14,7 @@ interface CogWindowProps {
 const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
   const { theme, setTheme } = useTheme();
   const { bgColor, textColor } = useThemeStyles();
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, username, displayName, setUsername, setDisplayName } = useAuth();
 
   const toggleTheme = () => {
     setTheme(theme === 0 ? 1 : 0);
@@ -25,6 +25,8 @@ const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
   const handleLogout = async() => {
     await logout();
     setIsLoggedIn(false);
+    setUsername("");
+    setDisplayName("");
   };
 
   return (

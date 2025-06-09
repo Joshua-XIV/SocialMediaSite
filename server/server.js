@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import posts from './routes/post.js';
+import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
@@ -25,6 +26,7 @@ app.use(logger);
 // Routes
 app.use('/api', posts);
 app.use('/api', authRoutes);
+app.use('/api', userRoutes);
 
 //Error Handler
 app.use(errorHandler)

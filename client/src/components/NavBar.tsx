@@ -13,16 +13,17 @@ import LoginForm from './LoginForm';
 
 const NavBar = () => {
   const { theme } = useTheme();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, username, displayName } = useAuth();
   const { bgColor, bgAntiColor, textColor, borderColor, hoverColor, popupColor } = useThemeStyles();
   const [openCog, setOpenCog] = useState(false);
   const [renderCog, setRenderCog] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
-  const [searchInput, setSearchInput] = useState("")
+  const [searchInput, setSearchInput] = useState("");
   const loginRef = useRef<HTMLDivElement>(null);
   const cogRef = useRef<HTMLDivElement>(null);
   const cogColor = theme === 0 ? "black" : "white";
 
+  // Suppose to help with animation
   const toggleCog = () => {
     if (!openCog) {
       setRenderCog(true);
@@ -33,6 +34,10 @@ const NavBar = () => {
     }
   };
 
+  // Fetches username and display name
+
+
+  // Closes Cog Window when click is outside element
   useEffect(() => {
     if (!openCog) return;
 
@@ -46,6 +51,7 @@ const NavBar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openCog]);
 
+  // Closes Login Window when click is outside element
   useEffect(() => {
     if (!openLogin) return;
 
@@ -59,6 +65,7 @@ const NavBar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openLogin]);
 
+  // Closes Login Window when pressing ESC
   useEffect(() => {
     if (!openLogin) return;
 
@@ -99,6 +106,8 @@ const NavBar = () => {
           >
               LOGIN
           </button>}
+          {/*isLoggedIn && <div>{username}</div>*/}
+          {isLoggedIn && <div>{displayName}</div>}
           <div className="relative" ref={cogRef}>
             <FontAwesomeIcon
               icon={faCog}
