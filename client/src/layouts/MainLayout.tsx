@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 const MainLayout = () => {
   const [sideBarOpen, setSideBarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const { isLoading } = useAuth();
   const [theme, setTheme] = useState<0 | 1>(() => {
     // Load from localStorage or default to 'dark'
@@ -23,6 +24,24 @@ const MainLayout = () => {
     localStorage.setItem("theme", theme.toString());
   }, [theme]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSideBarOpen(false);
+    } else {
+      setSideBarOpen(true);
+    }
+  }, [isMobile])
+
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <Background />
@@ -34,11 +53,13 @@ const MainLayout = () => {
               <SideBar
                 action={() => setSideBarOpen((prev) => !prev)}
                 sideBarOpen={sideBarOpen}
+                isMobile={isMobile}
               />
             }
             <div
+              className="w-full h-full"
               style={{
-                paddingLeft: sideBarOpen ? "16rem" : "4rem",
+                paddingLeft: !isMobile ? (sideBarOpen ? "16rem" : "4rem") : undefined,
                 transition: "padding-left 0.5s ease",
               }}
             >

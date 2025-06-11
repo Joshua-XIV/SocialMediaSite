@@ -5,7 +5,7 @@ const Background = () => {
 
   return (
     <div
-      className={`h-screen w-screen fixed -z-10`}
+      className={`h-full w-full fixed -z-10`}
       style={{ backgroundColor: backgroundLayer }}
     />
   );

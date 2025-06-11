@@ -31,7 +31,7 @@ export const createUser = async(req, res, next) => {
     const password_hash = await bcrypt.hash(password, saltRounds);
 
     const newUserAccount = await db.query(`INSERT INTO "user" (username, display_name, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [username, display_name, email, password_hash]
+      [username.toLowerCase(), display_name, email, password_hash]
     );
 
     const newUser = newUserAccount.rows[0];
@@ -69,7 +69,7 @@ export const loginUser = async (req, res, next) => {
   try {
     const userResult = await db.query(
       `SELECT * FROM "user" WHERE username = $1 OR email = $1 LIMIT 1`,
-      [emailOrUsername]
+      [emailOrUsername.toLowerCase()]
     );
 
     if (userResult.rows.length === 0) {
