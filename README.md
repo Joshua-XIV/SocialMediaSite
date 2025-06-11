@@ -81,5 +81,5 @@ Features are being added incrementally with a focus on clean architecture, modul
 
 ---
 
-## 📁 Project Structure (planned)
+> This project is focused on learning and building production-level practices in a personal environment. It is being developed incrementally with an emphasis on clean architecture and security.
 
