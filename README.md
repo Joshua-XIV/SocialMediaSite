@@ -47,7 +47,7 @@ Features are being added incrementally with a focus on clean architecture, modul
   Different permission levels for users, moderators, and admins
 
 - **Full-text Search**  
-  Smarter tweet discovery using PostgreSQL `tsvector` or ElasticSearch (future)
+  Post discovery using PostgreSQL or ElasticSearch
 
 ---
 
