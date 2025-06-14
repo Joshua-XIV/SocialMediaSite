@@ -1,6 +1,7 @@
-import { useState, type RefObject } from 'react';
+import { use, useState, type RefObject } from 'react';
 import CloseIcon from '../assets/close.svg?react'
 import { useThemeStyles } from '../hooks/useThemeStyles'
+import { createPost } from '../api/post';
 
 interface CreatePostWindowProps {
   closePost: () => void;
@@ -10,6 +11,25 @@ interface CreatePostWindowProps {
 const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
   const {bgColor, textColor, hoverColor, bgAntiColor, popupColor, borderColor} = useThemeStyles();
   const [post, setPost] = useState("");
+  const [error, setError] = useState("");
+
+  const handlePosts = async() => {
+    setError("");
+
+    if (post.length > 255) {
+      setError("Post cannot exceed 255 characters");
+      return;
+    }
+
+    try {
+      await createPost(post);
+      closePost();
+    } catch (err) {
+      setError("Something went wrong creating post");
+    }
+  }
+
+
   return (
     <div className="fixed inset-0 bg-black/50 z-10">
       <div
@@ -50,8 +70,9 @@ const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
             Cancel
           </button>             
           <button 
-            type="submit" 
+            type="button" 
             disabled={!post || post.length > 255}
+            onClick={handlePosts}
             className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
                         ${(!post || post.length > 255)? '' : 'hover:cursor-pointer'}
                         ${(!post || post.length > 255) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
