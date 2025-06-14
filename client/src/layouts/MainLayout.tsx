@@ -63,7 +63,7 @@ const MainLayout = () => {
                 transition: "padding-left 0.5s ease",
               }}
             >
-              <Outlet />
+              <Outlet/>
             </div>
           </div>
         </>)}

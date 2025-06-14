@@ -24,3 +24,22 @@ export const createPost = async(req, res, next) => {
     next(new HttpError("Something went wrong", 500));
   }
 }
+
+export const getHomePosts = async(req, res, next) => {
+  const maxLimit = 10;
+  const limit = Math.min(req.query.limit ? Number(req.query.limit) : maxLimit, maxLimit);
+  const offset = parseInt(req.query.offset) || 0;
+
+  const result = await db.query(
+    `SELECT post.id, post.content, post.created_at, "user".username 
+    FROM post
+    JOIN "user" on "user".id = post.user_id
+    WHERE post.is_deleted = false
+    ORDER BY post.created_at DESC
+    LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+
+  
+  res.status(201).json(result.rows);
+}

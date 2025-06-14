@@ -2,6 +2,7 @@ import { use, useState, type RefObject } from 'react';
 import CloseIcon from '../assets/close.svg?react'
 import { useThemeStyles } from '../hooks/useThemeStyles'
 import { createPost } from '../api/post';
+import { toast } from 'sonner';
 
 interface CreatePostWindowProps {
   closePost: () => void;
@@ -23,6 +24,7 @@ const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
 
     try {
       await createPost(post);
+      toast.success("Post Created");
       closePost();
     } catch (err) {
       setError("Something went wrong creating post");
