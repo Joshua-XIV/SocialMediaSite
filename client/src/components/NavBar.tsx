@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CogWindow from "./CogWindow";
 import CloseIcon from '../assets/close.svg?react';
 import LoginForm from './LoginForm';
+import SignUpForm from './SignUpForm';
 
 // Starting to become Div & Effect Soup, need to just refactor and put some stuff into components
 
@@ -18,6 +19,7 @@ const NavBar = () => {
   const [openCog, setOpenCog] = useState(false);
   const [renderCog, setRenderCog] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
+  const [authView, setAuthView] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const loginRef = useRef<HTMLDivElement>(null);
   const cogRef = useRef<HTMLDivElement>(null);
@@ -102,7 +104,7 @@ const NavBar = () => {
         <div className="space-x-6 flex">
           {!isLoggedIn && <button 
             className={`hover:cursor-pointer ${borderColor} border-2 px-2 rounded-xl bg-gray-400/30 hover:bg-gray-400/60`} 
-            onClick={() => setOpenLogin(true)}
+            onClick={() => {setOpenLogin(true); setAuthView("login");}}
           >
               LOGIN
           </button>}
@@ -122,7 +124,7 @@ const NavBar = () => {
                   openCog ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <CogWindow openLogin={() => setOpenLogin(true)} closeWindow={toggleCog} />
+                <CogWindow openLogin={() => setOpenLogin(true)} closeWindow={toggleCog} setAuthView={() => setAuthView("login")} />
               </div>
             )}
           </div>
@@ -143,7 +145,15 @@ const NavBar = () => {
             >
               <CloseIcon {...{fill: bgAntiColor} as React.SVGProps<SVGSVGElement>}/>
             </button>
-            <LoginForm onClose={() => setOpenLogin(false)}/>
+            {authView == 'login' && 
+              <LoginForm onClose={() => setOpenLogin(false)} signUpView={() => setAuthView("signup")}/>
+            }
+            {authView == 'signup' && 
+              <SignUpForm onClose={() => setOpenLogin(false)} loginView={() => setAuthView("login")}/>
+            }
+            {
+              authView == 'forgot-pass' && <div/>
+            }
           </div>
         </div>
       }

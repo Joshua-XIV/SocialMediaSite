@@ -27,3 +27,19 @@ export async function logout() {
     throw new Error(error || "Failed to logout");
   }
 }
+
+export async function signUp(username: string, display_name: string, email: string, password: string) {
+  const res = await fetch(`${API_URL}/api/auth/create-account`, {
+    method: 'POST',
+    headers: { "Content-Type" : "application/json" },
+    credentials: "include",
+    body: JSON.stringify({username, display_name, email, password})
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to Create Account");
+  }
+  
+  return res.json();
+}

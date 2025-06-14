@@ -86,7 +86,6 @@ export const loginUser = async (req, res, next) => {
     const userPayload = {id: user.id, username: user.username};
     const accessToken = generateAccessToken(userPayload);
     const refreshToken = generateRefreshToken(userPayload);
-
     await db.query(
       `INSERT INTO refresh_token (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
       [refreshToken, user.id]
