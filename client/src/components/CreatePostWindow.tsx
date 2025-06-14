@@ -1,0 +1,68 @@
+import { useState, type RefObject } from 'react';
+import CloseIcon from '../assets/close.svg?react'
+import { useThemeStyles } from '../hooks/useThemeStyles'
+
+interface CreatePostWindowProps {
+  closePost: () => void;
+  loginRef: RefObject<HTMLDivElement | null>;
+}
+
+const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
+  const {bgColor, textColor, hoverColor, bgAntiColor, popupColor, borderColor} = useThemeStyles();
+  const [post, setPost] = useState("");
+  return (
+    <div className="fixed inset-0 bg-black/50 z-10">
+      <div
+        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow w-md md:w-2xl z-20 rounded-3xl flex flex-col px-6`}
+        style={{ height : '100vh', maxHeight : '34rem', backgroundColor : popupColor}}
+        ref={loginRef}
+      >
+        {/* Close Window */}
+        <button 
+          className={`${textColor} w-8 h-8 right-0 mr-4 mt-4 absolute text-2xl hover:cursor-pointer 
+                    rounded-full flex items-center justify-center hover:scale-110 opacity-65 hover:opacity-100`}
+          style={{background : hoverColor}}
+          onClick={closePost}
+        >
+          <CloseIcon {...{fill: bgAntiColor} as React.SVGProps<SVGSVGElement>}/>
+        </button>
+        {/* Post Content */}
+        <div 
+          className={`relative w-full h-56 border-2 ${post.length > 255 ? "border-red-400": borderColor } mt-16 rounded-2xl opacity-80 hover:opacity-100`}
+          style={{background : hoverColor}}
+        >
+          <textarea 
+            className={`p-4 ${textColor} w-full h-full outline-none resize-none`} 
+            placeholder='Enter Text...'
+            onChange={(e) => setPost(e.target.value)}
+          >
+          </textarea>
+          <div className={`${post.length > 255 ? "text-red-400": "text-gray-400" } absolute bottom-0 right-2`}>{post.length}/255</div>
+        </div>
+        {/* Cancel/Send */}
+        <div className="flex flex-row justify-between mx-2">
+          <button 
+            type="button"
+            onClick={closePost}
+            className={`left-0 mt-4 px-4 py-2 rounded bg-red-600 ${textColor} cursor-pointer ${borderColor} 
+                        border-1 shadow opacity-80 hover:opacity-100 w-[5rem] text-center`}
+          >
+            Cancel
+          </button>             
+          <button 
+            type="submit" 
+            disabled={!post || post.length > 255}
+            className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
+                        ${(!post || post.length > 255)? '' : 'hover:cursor-pointer'}
+                        ${(!post || post.length > 255) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
+                        ${(!post || post.length > 255) ? hoverColor : 'bg-blue-600'}`}
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CreatePostWindow
