@@ -9,13 +9,12 @@ import { logout } from "../api/auth";
 interface CogWindowProps {
   openLogin: () => void;
   closeWindow: () => void;
-  setAuthView: () => void;
 }
 
-const CogWindow = ({openLogin, closeWindow, setAuthView} : CogWindowProps) => {
+const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
   const { theme, setTheme } = useTheme();
   const { bgColor, textColor } = useThemeStyles();
-  const { isLoggedIn, setIsLoggedIn, username, displayName, setUsername, setDisplayName } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, setUsername, setDisplayName } = useAuth();
 
   const toggleTheme = () => {
     setTheme(theme === 0 ? 1 : 0);
@@ -36,7 +35,7 @@ const CogWindow = ({openLogin, closeWindow, setAuthView} : CogWindowProps) => {
       className={`fixed mt-[1.5rem] mr-[1rem] right-0 flex flex-col justify-center items-center ${textColor} rounded-2xl p-2 shadow space-y-1`}
       style={{backgroundColor : bgColor }}
     >
-      {!isLoggedIn && <CogButton onClick={ () => {openLogin(); closeWindow(); setAuthView();}} text="Login/Sign-Up" />}
+      {!isLoggedIn && <CogButton onClick={ () => {openLogin(); closeWindow();}} text="Login/Sign-Up" />}
       {isLoggedIn && <CogButton onClick={() => ""} text="View Profile"/>}
       <CogButton onClick={handleSettings} text="Settings" />
       {isLoggedIn && <CogButton onClick={handleLogout} text="Logout"/>}

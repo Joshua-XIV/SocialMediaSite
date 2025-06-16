@@ -1,7 +1,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import HomePage from "./pages/HomePage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
-import { toast, Toaster } from 'sonner';
+import { Toaster } from 'sonner';
 
 const router = createBrowserRouter([
   {
