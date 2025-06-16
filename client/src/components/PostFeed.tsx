@@ -7,6 +7,9 @@ interface PostData {
   username: string;
   content: string;
   created_at: string;
+  display_name: string;
+  liked: boolean;
+  total_likes: number;
 }
 
 const PostFeed = () => {
@@ -60,7 +63,7 @@ const PostFeed = () => {
   return (
     <div className='flex flex-col gap-4 px-3 w-full h-[calc(100vh-3rem)] overflow-y-auto p-4 items-center'>
       {posts.map((post) => (
-        <Post display_name={''} key={post.id} {...post}/>
+        <Post key={post.id} {...post}/>
       ))}
       <div ref={loader} className='h-2'/>
       {!hasMore && <p>No More Posts!</p>}

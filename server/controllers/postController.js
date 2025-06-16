@@ -29,17 +29,60 @@ export const getHomePosts = async(req, res, next) => {
   const maxLimit = 10;
   const limit = Math.min(req.query.limit ? Number(req.query.limit) : maxLimit, maxLimit);
   const offset = parseInt(req.query.offset) || 0;
+  const userId = req.user?.id || null;
 
-  const result = await db.query(
-    `SELECT post.id, post.content, post.created_at, "user".username, "user".display_name
-    FROM post
-    JOIN "user" on "user".id = post.user_id
-    WHERE post.is_deleted = false
-    ORDER BY post.created_at DESC
-    LIMIT $1 OFFSET $2`,
-    [limit, offset]
-  );
-
-  
-  res.status(201).json(result.rows);
+  try {
+     const result = await db.query(
+      `SELECT 
+        post.id, 
+        post.content, 
+        post.created_at, 
+        "user".username, 
+        "user".display_name,
+        COUNT(pl_all.user_id) AS total_likes,
+        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+      FROM post
+      JOIN "user" ON "user".id = post.user_id
+      LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
+      LEFT JOIN post_like pl_user ON pl_user.post_id = post.id AND pl_user.user_id = $3
+      WHERE post.is_deleted = false
+      GROUP BY post.id, "user".username, "user".display_name, pl_user.user_id
+      ORDER BY post.created_at DESC
+      LIMIT $1 OFFSET $2`,
+      [limit, offset, userId]
+    );
+    return res.status(200).json(result.rows);
+  } catch {
+    next(new HttpError("Something went wrong", 500));
+  }
 }
+
+export const likePost = async(req, res, next) => {
+  const userId = req.user.id;
+  const postId = req.params.id;
+
+  try {
+    await db.query(
+      `INSERT INTO post_like (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [postId, userId]
+    );
+    return res.status(200).json({ success: "liked post" });
+  } catch {
+    next(new HttpError("Something went wrong", 500));
+  }
+};
+
+export const removeLikePost = async(req, res, next) => {
+  const userId = req.user.id;
+  const postId = req.params.id;
+
+  try {
+    await db.query(
+      `DELETE FROM post_like WHERE post_id = $1 AND user_id = $2`,
+      [postId, userId]
+    );
+    return res.status(200).json({ success: "removed like from post" });
+  } catch {
+    next(new HttpError("Something went wrong", 500));
+  }
+};

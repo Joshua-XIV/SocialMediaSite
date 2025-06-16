@@ -55,3 +55,18 @@ async function tryRefreshAccessToken(refreshToken, res) {
 
   return { id: payload.id, username: payload.username };
 }
+
+export function attachUserIfPossible(req, res, next) {
+  const accessToken = req.cookies.accessToken;
+
+  if (accessToken) {
+    try {
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+      req.user = decoded;
+    } catch (err) {
+      // Ignore
+    }
+  }
+
+  next();
+}

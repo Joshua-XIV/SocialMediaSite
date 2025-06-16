@@ -31,3 +31,33 @@ export async function getHomePosts(limit: number, offset: number) {
 
   return res.json();
 }
+
+export async function likePost(postId: string | number) {
+  const res = await fetch(`${API_URL}/api/post/${postId}/like`, {
+    method: 'PATCH',
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to like post");
+  }
+
+  return res.json();
+}
+
+export async function removeLikePost(postId: string | number) {
+  const res = await fetch(`${API_URL}/api/post/${postId}/unlike`, {
+    method: 'PATCH',
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to remove like from post");
+  }
+
+  return res.json();
+}
