@@ -2,6 +2,8 @@ import { useThemeStyles } from "../hooks/useThemeStyles";
 import { formatTimeShort } from "../util/formatTime";
 import { useState } from "react";
 import { likePost, removeLikePost } from "../api/post";
+import { useAuth } from "../contexts/AuthContext";
+import { useModal } from "../contexts/ModalContext";
 
 interface PostProps {
   username: string;
@@ -17,6 +19,8 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   const { postColor, textColor, postTextColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
+  const { isLoggedIn } = useAuth();
+  const { openLogin } = useModal();
 
   const handleToggleLike = async () => {
     setIsLiked(prev => !prev);
@@ -40,7 +44,9 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
       </div>
       <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
       <div className="flex justify-between">
-        <div className={`${isLiked ? "bg-red-500" : "bg-amber-50"}`} onClick={handleToggleLike}>{likeCount}</div>
+        <div 
+          className={`${isLiked ? "bg-red-500" : "bg-amber-50"} hover:cursor-pointer`} 
+          onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}>{likeCount}</div>
       </div>
     </div>
   );
