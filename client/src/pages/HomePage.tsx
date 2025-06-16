@@ -1,12 +1,12 @@
-import { useThemeStyles } from "../hooks/useThemeStyles";
 import PostFeed from "../components/PostFeed";
 
 const HomePage = () => {
-  const { textColor } = useThemeStyles();
 
   return (
     <>
-      <PostFeed/>
+      <div className="grid grid-cols-1">
+        <PostFeed/>
+      </div>
     </>
   );
 };

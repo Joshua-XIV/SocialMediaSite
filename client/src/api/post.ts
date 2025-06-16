@@ -15,3 +15,19 @@ export async function createPost(content: string) {
 
   return res.json();
 }
+
+export async function getHomePosts(limit: number, offset: number) {
+  const cappedLimit = Math.min(limit, 10);
+  const res = await fetch(`${API_URL}/api/post/get-home-posts?limit=${cappedLimit}&offset=${offset}`, {
+    method: 'GET',
+    headers: { "Content-Type" : "application/json" },
+    credentials: "include",
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Something went wrong");
+  }
+
+  return res.json();
+}

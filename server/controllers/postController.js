@@ -31,7 +31,7 @@ export const getHomePosts = async(req, res, next) => {
   const offset = parseInt(req.query.offset) || 0;
 
   const result = await db.query(
-    `SELECT post.id, post.content, post.created_at, "user".username 
+    `SELECT post.id, post.content, post.created_at, "user".username, "user".display_name
     FROM post
     JOIN "user" on "user".id = post.user_id
     WHERE post.is_deleted = false

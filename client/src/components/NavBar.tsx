@@ -8,9 +8,11 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import CogWindow from "./CogWindow";
 import CloseIcon from '../assets/close.svg?react';
+import HomeIcon from '../assets/home.svg?react';
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import CreatePostWindow from './CreatePostWindow';
+import { Link } from 'react-router-dom';
 
 // Starting to become Div & Effect Soup, need to just refactor and put some stuff into components
 
@@ -107,11 +109,9 @@ const NavBar = () => {
         style={{backgroundColor : bgColor }}
       >
         {/* Home */}
-        <div>
-          <button className={`hover:cursor-pointer ${borderColor} border-2 px-2 rounded-xl bg-gray-400/30 hover:bg-gray-400/60`}>
-            HOME
-          </button>
-        </div>
+        <Link to={'/'} className={`hover:cursor-pointer flex items-center`}>
+          <HomeIcon {...{fill : bgAntiColor, width: 28, height: 28} as React.SVGProps<SVGSVGElement>}/>
+        </Link>
         {/* Search */}
         <div className={`${borderColor} border-2 px-3 py-0.5 rounded-3xl w-2xs sm:w-xs md:w-md opacity-80 hover:opacity-100`}>
             <input 
