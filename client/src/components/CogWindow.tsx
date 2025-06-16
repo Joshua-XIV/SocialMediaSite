@@ -28,6 +28,7 @@ const CogWindow = ({openLogin, closeWindow, setAuthView} : CogWindowProps) => {
     setIsLoggedIn(false);
     setUsername("");
     setDisplayName("");
+    window.location.reload();
   };
 
   return (

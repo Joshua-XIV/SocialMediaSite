@@ -45,6 +45,7 @@ const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
       await login(username, password)
       setIsLoggedIn(true);
       onClose();
+      window.location.reload();
     } catch (err: any) {
         const message = err.message?.toLowerCase?.() || "";
         const fieldErrs: typeof fieldErrors = {};
