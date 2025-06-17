@@ -48,7 +48,7 @@ const MainLayout = () => {
       {!isLoading && (
         <>
           <NavBar />
-          <div className="pt-[3em]">
+          <div className="pt-[3em] flex">
             {
               <SideBar
                 action={() => setSideBarOpen((prev) => !prev)}
@@ -57,13 +57,13 @@ const MainLayout = () => {
               />
             }
             <div
-              className="w-full h-full"
+              className="flex justify-center w-full h-full"
               style={{
                 paddingLeft: !isMobile ? (sideBarOpen ? "16rem" : "4rem") : undefined,
                 transition: "padding-left 0.5s ease",
               }}
             >
-              <Outlet/>
+              <div className="w-full max-w-5xl"><Outlet/></div>
             </div>
           </div>
         </>)}

@@ -57,6 +57,38 @@ export const getHomePosts = async(req, res, next) => {
   }
 }
 
+export const getPost = async(req, res, next) => {
+  const userId = req.user?.id || null;
+  const postId = parseInt(req.params.id);
+
+  try {
+    const result = await db.query(
+      `SELECT
+        post.id,
+        post.content,
+        post.created_at,
+        "user".username,
+        "user".display_name,
+        COUNT (pl_all.user_id) AS total_likes,
+        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+      FROM post
+      JOIN "user" on "user".id = post.user_id
+      LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
+      LEFT JOIN post_like pl_user on pl_user.post_id = post.id and pl_user.user_id = $2
+      WHERE post.id = $1 AND post.is_deleted = false
+      GROUP BY post.id, "user".username, "user".display_name, pl_user.user_id`,
+      [postId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      next(new HttpError("Post Not Found", 404));
+    }
+    return res.status(200).json(result.rows[0]);
+  } catch {
+    next(new HttpError("Failed to fetch post", 500));
+  }
+}
+
 export const likePost = async(req, res, next) => {
   const userId = req.user.id;
   const postId = req.params.id;

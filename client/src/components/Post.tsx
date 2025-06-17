@@ -5,6 +5,7 @@ import { likePost, removeLikePost } from "../api/post";
 import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
+import { Link, useLocation } from "react-router-dom";
 
 interface PostProps {
   username: string;
@@ -22,6 +23,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
+  const location = useLocation();
   const heartColor = 'red';
 
   const handleToggleLike = async () => {
@@ -35,27 +37,51 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
     }
   };
 
+  const onPage = location.pathname === `/post/${id}`
   return (
-    <div 
-      className={`rounded-xl p-4 shadow w-full max-w-4xl`}
-      style={{background : postColor}}
-      >
-      <div className={`${textColor} flex items-center gap-x-2`}>
-        <p className="text-md font-bold">{`${display_name}`}</p>
-        <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
-      </div>
-      <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
-      <div className="flex justify-between">
-        <div className="flex gap-x-3 items-center">
-          <FiHeart
-            className="heart hover:cursor-pointer"
-            style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
-            onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
-          />
-            <p className={`text-gray-400`}>{likeCount}</p>
+    <>
+      {!onPage && <Link
+        className={`rounded-xl p-4 shadow w-full max-w-4xl`}
+        style={{background : postColor}}
+        to={`/post/${id}`}
+        >
+        <div className={`${textColor} flex items-center gap-x-2`}>
+          <p className="text-md font-bold">{`${display_name}`}</p>
+          <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
         </div>
-      </div>
-    </div>
+        <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
+        <div className="flex justify-between">
+          <div className="flex gap-x-3 items-center">
+            <FiHeart
+              className="heart hover:cursor-pointer"
+              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
+              onClick={(e) => {e.preventDefault(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
+            />
+              <p className={`text-gray-400`}>{likeCount}</p>
+          </div>
+        </div>
+      </Link>}
+      {onPage && <div
+        className={`rounded-xl p-4 shadow w-full max-w-4xl`}
+        style={{background : postColor}}
+        >
+        <div className={`${textColor} flex items-center gap-x-2`}>
+          <p className="text-md font-bold">{`${display_name}`}</p>
+          <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
+        </div>
+        <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
+        <div className="flex justify-between">
+          <div className="flex gap-x-3 items-center">
+            <FiHeart
+              className="heart hover:cursor-pointer"
+              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
+              onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
+            />
+              <p className={`text-gray-400`}>{likeCount}</p>
+          </div>
+        </div>
+      </div>}
+    </>
   );
 };
 

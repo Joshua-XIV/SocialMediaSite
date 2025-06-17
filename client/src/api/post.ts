@@ -32,6 +32,21 @@ export async function getHomePosts(limit: number, offset: number) {
   return res.json();
 }
 
+export async function getPost(id: number) {
+  const res = await fetch(`${API_URL}/api/post/get-post/${id}`, {
+    method: 'GET',
+    headers: { "Content-Type" : "application/json" },
+    credentials: "include",
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Something went wrong");
+  }
+
+  return res.json();
+}
+
 export async function likePost(postId: string | number) {
   const res = await fetch(`${API_URL}/api/post/${postId}/like`, {
     method: 'PATCH',
@@ -46,6 +61,7 @@ export async function likePost(postId: string | number) {
 
   return res.json();
 }
+
 
 export async function removeLikePost(postId: string | number) {
   const res = await fetch(`${API_URL}/api/post/${postId}/unlike`, {

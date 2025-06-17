@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { getHomePosts } from '../api/post';
 import Post from './Post';
 
-interface PostData {
+interface PostsData {
   id: number;
   username: string;
   content: string;
@@ -13,7 +13,7 @@ interface PostData {
 }
 
 const PostFeed = () => {
-  const [posts, setPosts] = useState<PostData[]>([]);
+  const [posts, setPosts] = useState<PostsData[]>([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
@@ -61,7 +61,7 @@ const PostFeed = () => {
   }, [hasMore, isFetching]);
 
   return (
-    <div className='flex flex-col gap-4 px-3 w-full h-[calc(100vh-3rem)] overflow-y-auto p-4 items-center'>
+    <div className='flex flex-col gap-4 px-3 w-full h-[calc(100vh-3rem)] p-4 items-center'>
       {posts.map((post) => (
         <Post key={post.id} {...post}/>
       ))}
