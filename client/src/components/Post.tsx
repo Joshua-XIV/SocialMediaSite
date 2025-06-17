@@ -4,6 +4,7 @@ import { useState } from "react";
 import { likePost, removeLikePost } from "../api/post";
 import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
+import { FiHeart } from "react-icons/fi";
 
 interface PostProps {
   username: string;
@@ -21,6 +22,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
+  const heartColor = 'red';
 
   const handleToggleLike = async () => {
     setIsLiked(prev => !prev);
@@ -44,9 +46,14 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
       </div>
       <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
       <div className="flex justify-between">
-        <div 
-          className={`${isLiked ? "bg-red-500" : "bg-amber-50"} hover:cursor-pointer`} 
-          onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}>{likeCount}</div>
+        <div className="flex gap-x-3 items-center">
+          <FiHeart
+            className="heart hover:cursor-pointer"
+            style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
+            onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
+          />
+            <p className={`text-gray-400`}>{likeCount}</p>
+        </div>
       </div>
     </div>
   );
