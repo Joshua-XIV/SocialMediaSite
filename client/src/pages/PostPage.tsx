@@ -6,6 +6,7 @@ import { useThemeStyles } from '../hooks/useThemeStyles';
 import { useNavigate } from 'react-router-dom';
 import { faArrowLeftLong, faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { text } from '@fortawesome/fontawesome-svg-core';
 
 interface PostData {
   id: number;
@@ -20,6 +21,8 @@ interface PostData {
 const PostPage = () => {
   const {id} = useParams<{ id:string }>();
   const [post ,setPost] = useState<PostData | null>(null);
+  const [reply, setReply] = useState("");
+  const {borderColor} = useThemeStyles();
   const [loading, setLoading] = useState(true);
   const { textColor } = useThemeStyles();
   const navigator = useNavigate();
@@ -51,8 +54,37 @@ const PostPage = () => {
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
       </div>
-      <div className={`flex justify-center`}>
-        {post && <Post {...post}/>}
+      <div className={`border-1 p-4 ${borderColor}`}>
+        <div className={`flex justify-center`}>
+          {post && <Post {...post}/>}
+        </div>
+        <textarea 
+          className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`} 
+          placeholder='Reply'
+          value={reply}
+          onChange={(e) => {
+            setReply(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = e.target.scrollHeight + "px";
+          }}
+          style={{overflow : 'hidden'}}
+        >
+        </textarea>
+        <div className={`flex justify-end items-center gap-x-4 pb-1`}>
+          <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
+          <button 
+            className={`flex justify-center items-center border-1 ${borderColor} rounded-xl p-1 ${textColor} w-12
+                        ${reply.length > 255 || reply.length == 0 ? "" : "hover:cursor-pointer"}
+                        ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
+                        ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
+            disabled={reply.length > 255}
+          > 
+            SEND 
+          </button>
+        </div>
+      </div>
+      <div className={`${textColor} ${borderColor} border-x-1 border-b-1 p-2`}>
+          COMMENTS
       </div>
     </div>
   )

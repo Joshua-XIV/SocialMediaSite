@@ -62,7 +62,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
         </div>
       </Link>}
       {onPage && <div
-        className={`border-b-2 p-2 ${borderColor} w-full`}
+        className={`border-b-1 p-2 ${borderColor} w-full`}
         style={{}}
         >
         <div className={`${textColor} flex items-center gap-x-2`}>
