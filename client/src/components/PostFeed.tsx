@@ -61,7 +61,7 @@ const PostFeed = () => {
   }, [hasMore, isFetching]);
 
   return (
-    <div className='flex flex-col gap-4 px-3 w-full h-[calc(100vh-3rem)] p-4 items-center'>
+    <div className='flex flex-col px-3 w-full h-[calc(100vh-3rem)] p-4 items-center'>
       {posts.map((post) => (
         <Post key={post.id} {...post}/>
       ))}

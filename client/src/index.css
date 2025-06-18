@@ -19,3 +19,8 @@
 .heart:hover {
   animation: heartBeat 1s infinite;
 }
+
+.red-shadow:hover {
+  border-radius: 50%;
+  background-color: rgb(255, 0, 0, 0.4);
+}

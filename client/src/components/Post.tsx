@@ -18,7 +18,7 @@ interface PostProps {
 }
 
 const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostProps) => {
-  const { postColor, textColor, postTextColor } = useThemeStyles();
+  const { postColor, textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();
@@ -41,8 +41,8 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   return (
     <>
       {!onPage && <Link
-        className={`rounded-xl p-4 shadow w-full max-w-4xl`}
-        style={{background : postColor}}
+        className={`border-b-2 p-2 ${borderColor} w-full opacity-80 hover:opacity-100 hover:bg-gray-500/20`}
+        style={{}}
         to={`/post/${id}`}
         >
         <div className={`${textColor} flex items-center gap-x-2`}>
@@ -62,8 +62,8 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
         </div>
       </Link>}
       {onPage && <div
-        className={`rounded-xl p-4 shadow w-full max-w-4xl`}
-        style={{background : postColor}}
+        className={`border-b-2 p-2 ${borderColor} w-full`}
+        style={{}}
         >
         <div className={`${textColor} flex items-center gap-x-2`}>
           <p className="text-md font-bold">{`${display_name}`}</p>
@@ -74,10 +74,10 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
           <div className="flex gap-x-3 items-center">
             <FiHeart
               className="heart hover:cursor-pointer"
-              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
+              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`, backgroundSize : 150}}
               onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
             />
-              <p className={`text-gray-400`}>{likeCount}</p>
+            <p className={`text-gray-400`}>{likeCount}</p>
           </div>
         </div>
       </div>}

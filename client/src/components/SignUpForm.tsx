@@ -30,7 +30,11 @@ const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
 
     if (!username.trim()) errors.username = "Missing Username";
     if (!displayName.trim()) errors.displayName = "Missing Display Name";
-    if (!email.trim()) errors.email = "Missing Email";
+    if (!email.trim()) {
+      errors.email = "Missing Email";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Invalid Email Address";
+    }
     if (!password.trim()) errors.password = "Missing Password";
 
     if (Object.keys(errors).length > 0) {
@@ -91,7 +95,7 @@ const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
           placeholder="Password"
           value={password}
           onChange={setPassword}
-          isPrivate={true}
+          type={"password"}
           error={fieldErrors.password}
         />
       </div>

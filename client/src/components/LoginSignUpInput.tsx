@@ -7,11 +7,11 @@ interface LoginSignUpInputProps {
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
-  isPrivate?: boolean;
+  type?: string;
   error?: string;
 }
 
-const LoginSignUpInput = ({placeholder, value, onChange, isPrivate, error} : LoginSignUpInputProps) => {
+const LoginSignUpInput = ({placeholder, value, onChange, type, error} : LoginSignUpInputProps) => {
   const {hoverColor, textColor, hoverColor_2, borderColor, bgAntiColor} = useThemeStyles();
   const [enableInput, setEnableInput] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null)
@@ -56,13 +56,13 @@ const LoginSignUpInput = ({placeholder, value, onChange, isPrivate, error} : Log
               <div className={`ml-[1rem] text-gray-400 transition-all duration-300 ${enableInput ? 'text-[12px]' : ''}`}>{placeholder}</div>
               {(enableInput || value) &&
                 <input
-                  type={isPrivate && !showPassword ? "password" : "text" }
+                  type={type === "password" && showPassword ? "text" : type}
                   className={`mx-4 outline-none ${textColor}`}
                   ref={inputRef} onChange={(e) => onChange(e.target.value)}
                 />
               }
             </div>
-            {isPrivate && <div className="mr-6 hover:cursor-pointer opacity-50 hover:opacity-100" onClick={() => setShowPassword(prev => !prev)}>
+            {type === "password" && <div className="mr-6 hover:cursor-pointer opacity-50 hover:opacity-100" onClick={() => setShowPassword(prev => !prev)}>
               {!showPassword && <PassHideIcon {...{fill: bgAntiColor, width: 30, height: 30} as React.SVGProps<SVGSVGElement>}/>}
               {showPassword && <PassShowIcon {...{fill: bgAntiColor, width: 30, height: 30} as React.SVGProps<SVGSVGElement>}/>}
             </div>}

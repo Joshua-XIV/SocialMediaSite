@@ -43,9 +43,9 @@ const PostPage = () => {
 
   return (
     <div>
-      <div className='p-6'>
+      <div className='py-3'>
         <div
-          className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 p-1 rounded-full flex items-center justify-center`}
+          className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center`}
           onClick={() => navigator(-1)}
         >
           <FontAwesomeIcon icon={faArrowLeft}/>

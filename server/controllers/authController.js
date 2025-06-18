@@ -19,6 +19,9 @@ export const createUser = async(req, res, next) => {
   if (!display_name) missingField.push("Display Name");
   if (display_name.length > 40) return next(new HttpError("Display Name can't be longer than 40 characters", 400));
   if (!email) missingField.push("Email");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  return next(new HttpError("Invalid Email Format", 400));
+  }
   if (!password) missingField.push("Password");
   if (password.length > 64) return next(new HttpError("Password can't be longer than 64 characters", 400));
 

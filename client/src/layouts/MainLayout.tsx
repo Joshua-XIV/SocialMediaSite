@@ -63,7 +63,7 @@ const MainLayout = () => {
                 transition: "padding-left 0.5s ease",
               }}
             >
-              <div className="w-full max-w-5xl"><Outlet/></div>
+              <div className="w-full max-w-4xl"><Outlet/></div>
             </div>
           </div>
         </>)}

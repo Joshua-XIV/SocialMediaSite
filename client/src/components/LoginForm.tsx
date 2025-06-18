@@ -70,7 +70,7 @@ const LoginForm = ({onClose, signUpView} : LoginFormProps) => {
           placeholder="Password"
           value={password}
           onChange={setPassword}
-          isPrivate={true}
+          type={"password"}
           error={fieldErrors.password}
         />
       </div>
