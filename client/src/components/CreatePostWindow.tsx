@@ -1,4 +1,4 @@
-import { use, useState, type RefObject } from 'react';
+import { useState, type RefObject } from 'react';
 import CloseIcon from '../assets/close.svg?react'
 import { useThemeStyles } from '../hooks/useThemeStyles'
 import { createPost } from '../api/post';

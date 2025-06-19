@@ -20,7 +20,7 @@ export const createPost = async(req, res, next) => {
     const newPost = post.rows[0];
     res.status(201).json(newPost);
   } catch (err) {
-    console.error('DB Error:', err.message);
+    console.error('DB Error: ', err.message);
     next(new HttpError("Something went wrong", 500));
   }
 }

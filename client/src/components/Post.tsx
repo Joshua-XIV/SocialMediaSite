@@ -18,7 +18,7 @@ interface PostProps {
 }
 
 const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostProps) => {
-  const { postColor, textColor, postTextColor, borderColor } = useThemeStyles();
+  const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();

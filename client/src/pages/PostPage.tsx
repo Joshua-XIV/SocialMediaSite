@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import { getPost } from '../api/post';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { useNavigate } from 'react-router-dom';
-import { faArrowLeftLong, faArrowLeft} from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { text } from '@fortawesome/fontawesome-svg-core';
 
 interface PostData {
   id: number;
