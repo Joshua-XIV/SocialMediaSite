@@ -1,19 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getHomePosts } from '../api/post';
 import Post from './Post';
-
-interface PostsData {
-  id: number;
-  username: string;
-  content: string;
-  created_at: string;
-  display_name: string;
-  liked: boolean;
-  total_likes: number;
-}
+import type { PostData } from '../util/types';
 
 const PostFeed = () => {
-  const [posts, setPosts] = useState<PostsData[]>([]);
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isFetching, setIsFetching] = useState(false);

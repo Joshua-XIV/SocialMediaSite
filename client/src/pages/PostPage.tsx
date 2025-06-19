@@ -9,27 +9,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { createComment, getComments } from '../api/comment';
 import { toast } from 'sonner';
 import Comment from '../components/Comment';
-
-interface PostData {
-  id: number;
-  username: string;
-  content: string;
-  created_at: string;
-  display_name: string;
-  liked: boolean;
-  total_likes: number;
-}
-
-interface CommentData {
-  id: number;
-  username: string;
-  content: string;
-  created_at: string;
-  display_name: string;
-  liked: boolean;
-  total_likes: number;
-  parentID: number;
-}
+import { useAuth } from '../contexts/AuthContext';
+import { useModal } from '../contexts/ModalContext';
+import type { PostData, CommentData } from '../util/types';
 
 const PostPage = () => {
   const {id} = useParams<{ id:string }>();
@@ -47,7 +29,10 @@ const PostPage = () => {
   const [error, setError] = useState("");
   const { textColor } = useThemeStyles();
   const navigator = useNavigate();
+  const { isLoggedIn } = useAuth();
+  const { openLogin } = useModal();  
 
+  // Fetch Main Post Content
   useEffect(() => {
     const fetchPost = async () => {
       const parsedId = parseInt(id ?? "");
@@ -65,6 +50,7 @@ const PostPage = () => {
     if (id) fetchPost();
   }, [id]);
 
+  // Grabs Comments when needed
   const fetchComments = useCallback(async () => {
     if (!id || isFetchingComments || !hasMoreComments) return;
     setIsFetchingComments(true);
@@ -89,10 +75,12 @@ const PostPage = () => {
     }
   }, [id, commentOffset, isFetchingComments, hasMoreComments]);
 
+  // Once Offset changes, fetch comments
   useEffect(() => {
     fetchComments();
   }, [commentOffset]);
 
+  // Checks to load more comments
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMoreComments && !isFetchingComments) {
@@ -108,6 +96,7 @@ const PostPage = () => {
     };
   }, [hasMoreComments, isFetchingComments]);  
 
+  // Reply Call
   const handleReply = async() => {
     setError("");
     setReplyLoading(true);
@@ -127,6 +116,7 @@ const PostPage = () => {
 
   return (
     <div>
+      {/* Navigate Backwards */}
       <div className='py-3'>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center`}
@@ -135,41 +125,54 @@ const PostPage = () => {
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
       </div>
+      {/* Post Content and Reply */}
       <div className={`border-1 p-4 ${borderColor}`}>
         <div className={`flex justify-center`}>
           {post && <Post {...post}/>}
         </div>
-        <textarea 
-          className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`} 
-          placeholder='Reply'
-          value={reply}
-          onChange={(e) => {
-            setReply(e.target.value);
-            e.target.style.height = "auto";
-            e.target.style.height = e.target.scrollHeight + "px";
-          }}
-          style={{overflow : 'hidden'}}
-        >
-        </textarea>
-        <div className={`flex justify-end items-center gap-x-4 pb-1`}>
-          <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
-          <button 
-            className={`flex justify-center items-center border-1 ${borderColor} rounded-xl p-1 ${textColor} w-12
-                        ${reply.length > 255 || reply.length == 0 ? "" : "hover:cursor-pointer"}
-                        ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
-                        ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
-            disabled={reply.length > 255}
-            onClick={handleReply}
-          > 
-            SEND 
-          </button>
-        </div>
+        {/* Reply Section */}
+        <section>
+          <textarea
+            className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`}
+            placeholder='Reply'
+            value={reply}
+            onChange={(e) => {
+              setReply(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
+            style={{overflow : 'hidden'}}
+          >
+          </textarea>
+          <div className={`flex justify-end items-center gap-x-4 pb-1`}>
+            <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
+            <button
+              className={`flex justify-center items-center border-1 ${borderColor} rounded-xl p-1 ${textColor} w-12
+                          ${reply.length > 255 || reply.length == 0 ? "" : "hover:cursor-pointer"}
+                          ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
+                          ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
+              disabled={reply.length > 255}
+              onClick={(e) => {
+                e.preventDefault();
+                if (isLoggedIn) {
+                  handleReply();
+                } else {
+                  (openLogin("login"));
+                }
+              }}
+            >
+              SEND
+            </button>
+          </div>
+        </section>
       </div>
+      {/* Comments*/}
       <div className={`${textColor} ${borderColor} border-x-1 border-b-1 flex flex-col`}>
           {comments.map((comment) => (
             <Comment key={comment.id} {...comment}/>
           ))}
       </div>
+      {/* Reference to keep loading more comoments */}
       <div className='text-white' ref={commentLoader}>LOADER</div>
     </div>
   )

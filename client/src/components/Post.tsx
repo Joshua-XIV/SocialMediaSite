@@ -6,18 +6,9 @@ import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
+import type { PostData } from "../util/types";
 
-interface PostProps {
-  username: string;
-  display_name: string;
-  content: string;
-  created_at: string;
-  id: number;
-  liked: boolean;
-  total_likes: number;
-}
-
-const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostProps) => {
+const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);

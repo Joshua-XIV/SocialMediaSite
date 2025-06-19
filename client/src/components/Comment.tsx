@@ -5,16 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
-
-interface CommentData {
-  id: number;
-  username: string;
-  content: string;
-  created_at: string;
-  display_name: string;
-  liked: boolean;
-  total_likes: number;
-}
+import type { CommentData } from "../util/types";
 
 const Comment = ({id, username, content, created_at, display_name, liked, total_likes} : CommentData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
