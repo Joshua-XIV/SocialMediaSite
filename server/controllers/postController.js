@@ -57,7 +57,7 @@ export const getHomePosts = async(req, res, next) => {
   }
 }
 
-export const getPost = async(req, res, next) => {
+export const getPost = async (req, res, next) => {
   const userId = req.user?.id || null;
   const postId = parseInt(req.params.id);
 
@@ -69,25 +69,32 @@ export const getPost = async(req, res, next) => {
         post.created_at,
         "user".username,
         "user".display_name,
-        COUNT (pl_all.user_id) AS total_likes,
-        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+        COALESCE((
+          SELECT COUNT(*)
+          FROM post_like pl_all
+          WHERE pl_all.post_id = post.id
+        ), 0) AS total_likes,
+        EXISTS (
+          SELECT 1
+          FROM post_like pl_user
+          WHERE pl_user.post_id = post.id AND pl_user.user_id = $2
+        ) AS liked
       FROM post
-      JOIN "user" on "user".id = post.user_id
-      LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
-      LEFT JOIN post_like pl_user on pl_user.post_id = post.id and pl_user.user_id = $2
-      WHERE post.id = $1 AND post.is_deleted = false
-      GROUP BY post.id, "user".username, "user".display_name, pl_user.user_id`,
+      JOIN "user" ON "user".id = post.user_id
+      WHERE post.id = $1 AND post.is_deleted = false`,
       [postId, userId]
     );
 
     if (result.rows.length === 0) {
-      next(new HttpError("Post Not Found", 404));
+      return next(new HttpError("Post Not Found", 404));
     }
+
     return res.status(200).json(result.rows[0]);
-  } catch {
-    next(new HttpError("Failed to fetch post", 500));
+  } catch (err) {
+    console.error(err);
+    return next(new HttpError("Failed to fetch post", 500));
   }
-}
+};
 
 export const likePost = async(req, res, next) => {
   const userId = req.user.id;

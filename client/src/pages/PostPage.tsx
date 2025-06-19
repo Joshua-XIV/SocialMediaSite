@@ -1,11 +1,14 @@
 import Post from '../components/Post';
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getPost } from '../api/post';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 import { useNavigate } from 'react-router-dom';
 import { faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { createComment, getComments } from '../api/comment';
+import { toast } from 'sonner';
+import Comment from '../components/Comment';
 
 interface PostData {
   id: number;
@@ -17,12 +20,31 @@ interface PostData {
   total_likes: number;
 }
 
+interface CommentData {
+  id: number;
+  username: string;
+  content: string;
+  created_at: string;
+  display_name: string;
+  liked: boolean;
+  total_likes: number;
+  parentID: number;
+}
+
 const PostPage = () => {
   const {id} = useParams<{ id:string }>();
   const [post ,setPost] = useState<PostData | null>(null);
+  const [comments, setComments] = useState<CommentData[]>([]);
+  const [commentOffset, setCommentOffset] = useState(0);
+  const [hasMoreComments, setHasMoreComments] = useState(true);
+  const [isFetchingComments, setIsFetchingComments] = useState(false);
+  const commentLoader = useRef(null);
+  const MAX_COMMENT_LIMIT = 10;
   const [reply, setReply] = useState("");
   const {borderColor} = useThemeStyles();
-  const [loading, setLoading] = useState(true);
+  const [postLoading, setPostLoading] = useState(true);
+  const [replyLoading, setReplyLoading] = useState(false);
+  const [error, setError] = useState("");
   const { textColor } = useThemeStyles();
   const navigator = useNavigate();
 
@@ -36,12 +58,72 @@ const PostPage = () => {
       } catch (err) {
         console.error("Error Fetching Posts", err)
       } finally {
-        setLoading(false);
+        setPostLoading(false);
       }
     };
 
     if (id) fetchPost();
   }, [id]);
+
+  const fetchComments = useCallback(async () => {
+    if (!id || isFetchingComments || !hasMoreComments) return;
+    setIsFetchingComments(true);
+
+    try {
+      const parsedId = parseInt(id);
+      const newComments = await getComments({
+        postId: parsedId,
+        offset: commentOffset,
+        limit: MAX_COMMENT_LIMIT
+      });
+      setComments(prev => {
+        const ids = new Set(prev.map(c => c.id));
+        const uniqueNew = newComments.filter((c: { id: number; }) => !ids.has(c.id));
+        return [...prev, ...uniqueNew];
+      });
+      setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
+    } catch (err) {
+      console.error("Failed to fetch comments", err);
+    } finally {
+      setIsFetchingComments(false);
+    }
+  }, [id, commentOffset, isFetchingComments, hasMoreComments]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [commentOffset]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMoreComments && !isFetchingComments) {
+        setCommentOffset(prev => prev + MAX_COMMENT_LIMIT);
+      }
+    }, { threshold: 1 });
+
+    const currentLoader = commentLoader.current;
+    if (currentLoader) observer.observe(currentLoader);
+
+    return () => {
+      if (currentLoader) observer.unobserve(currentLoader);
+    };
+  }, [hasMoreComments, isFetchingComments]);  
+
+  const handleReply = async() => {
+    setError("");
+    setReplyLoading(true);
+    const parsedId = parseInt(id ?? "");
+    if (isNaN(parsedId)) return;
+    try {
+      await createComment(parsedId, reply, null);
+      setReply("");
+      toast.success("Comment Created");
+    } catch (err) {
+      console.error("Failed to create comment: ", err);
+      toast.error("Something went wrong");
+    } finally {
+      setReplyLoading(false);
+    }
+  }
 
   return (
     <div>
@@ -77,14 +159,18 @@ const PostPage = () => {
                         ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
                         ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
             disabled={reply.length > 255}
+            onClick={handleReply}
           > 
             SEND 
           </button>
         </div>
       </div>
-      <div className={`${textColor} ${borderColor} border-x-1 border-b-1 p-2`}>
-          COMMENTS
+      <div className={`${textColor} ${borderColor} border-x-1 border-b-1 flex flex-col`}>
+          {comments.map((comment) => (
+            <Comment key={comment.id} {...comment}/>
+          ))}
       </div>
+      <div className='text-white' ref={commentLoader}>LOADER</div>
     </div>
   )
 }

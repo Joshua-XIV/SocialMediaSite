@@ -10,7 +10,7 @@ interface CreatePostWindowProps {
 }
 
 const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
-  const {bgColor, textColor, hoverColor, bgAntiColor, popupColor, borderColor} = useThemeStyles();
+  const { textColor, hoverColor, bgAntiColor, popupColor, borderColor} = useThemeStyles();
   const [post, setPost] = useState("");
   const [error, setError] = useState("");
 

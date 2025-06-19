@@ -12,7 +12,7 @@ export async function authenticate(req, res, next) {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       req.user = decoded;
       return next();
-    } catch {
+    } catch (err) {
       if (process.env.NODE_ENV !== 'prod') {
         console.error('Access token verification failed:', err.message);
       }

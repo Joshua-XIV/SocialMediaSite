@@ -5,6 +5,7 @@ import posts from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
 
@@ -28,7 +29,8 @@ app.use(logger);
 app.use('/api', posts);
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
-app.use('/api', postRoutes)
+app.use('/api', postRoutes);
+app.use('/api', commentRoutes);
 
 //Error Handler
 app.use(errorHandler)
