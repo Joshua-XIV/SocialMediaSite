@@ -134,3 +134,33 @@ export const getComments = async (req, res, next) => {
     return next(new HttpError("Failed to fetch comments", 500));
   }
 };
+
+export const likeComment = async(req, res, next) => {
+  const userID = req.user.id;
+  const commentID = req.params.id;
+
+  try {
+    await db.query(
+      `INSERT INTO comment_like (comment_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [commentID, userID]
+    );
+    return res.status(200).json({ success: "liked comment" });
+  } catch {
+    next(new HttpError("Something went wrong", 500));
+  }
+};
+
+export const removeLikeComment = async(req, res, next) => {
+  const userID = req.user.id;
+  const commentID = req.params.id;
+
+  try {
+    await db.query(
+      `DELETE FROM comment_like WHERE comment_id = $1 AND user_id = $2`,
+      [commentID, userID]
+    );
+    return res.status(200).json({ success: "removed like rom comment" });
+  } catch {
+    next(new HttpError("Something went wrong", 500));
+  }
+};

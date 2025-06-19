@@ -47,8 +47,8 @@ export async function getPost(id: number) {
   return res.json();
 }
 
-export async function likePost(postId: string | number) {
-  const res = await fetch(`${API_URL}/api/post/${postId}/like`, {
+export async function likePost(postID: string | number) {
+  const res = await fetch(`${API_URL}/api/post/${postID}/like`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -63,8 +63,8 @@ export async function likePost(postId: string | number) {
 }
 
 
-export async function removeLikePost(postId: string | number) {
-  const res = await fetch(`${API_URL}/api/post/${postId}/unlike`, {
+export async function removeLikePost(postID: string | number) {
+  const res = await fetch(`${API_URL}/api/post/${postID}/unlike`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",

@@ -1,8 +1,9 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Toaster } from 'sonner';
 import HomePage from "./pages/HomePage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
 import PostPage from "./pages/PostPage.tsx"
-import { Toaster } from 'sonner';
+import CommentPage from "./components/CommentPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -10,7 +11,9 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: '/post/:id',element: <PostPage/>}],
+      { path: '/post/:id', element: <PostPage/>},
+      { path: '/comment/:id', element: <CommentPage/>}
+    ],
   },
 ]);
 

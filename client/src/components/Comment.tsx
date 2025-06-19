@@ -6,6 +6,7 @@ import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import type { CommentData } from "../util/types";
+import { likeComment, removeLikeComment } from "../api/comment";
 
 const Comment = ({id, username, content, created_at, display_name, liked, total_likes} : CommentData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
@@ -20,8 +21,8 @@ const Comment = ({id, username, content, created_at, display_name, liked, total_
     setIsLiked(prev => !prev);
     setLikeCount(prev => Number(prev) + (isLiked ? -1 : 1));
     try {
-      if (!isLiked) ""
-      else ""
+      if (!isLiked) likeComment(id);
+      else removeLikeComment(id);
     } catch (err) {
       console.error(err);
     }

@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
-export async function createComment(postID : number, content : string, parentID : number | null) {
+export async function createComment(postID : number | null, content : string, parentID : number | null) {
   if (!content.trim()) throw new Error("Comment cannot be empty");
   const res = await fetch(`${API_URL}/api/comment/create-comment`, {
     method: "POST",
@@ -57,6 +57,36 @@ export async function getComments(
   if (!res.ok) {
     const { error } = await res.json();
     throw new Error(error || "Failed to fetch comments");
+  }
+
+  return res.json();
+}
+
+export async function likeComment (commentID: string | number) {
+  const res = await fetch(`${API_URL}/api/comment/${commentID}/like`, {
+    method: 'PATCH',
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",    
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to like comment");
+  }
+
+  return res.json();
+}
+
+export async function removeLikeComment (commentID: string | number) {
+  const res = await fetch(`${API_URL}/api/comment/${commentID}/unlike`, {
+    method: 'PATCH',
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",    
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to remove like from comment");
   }
 
   return res.json();

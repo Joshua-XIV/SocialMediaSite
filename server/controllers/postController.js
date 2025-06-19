@@ -29,7 +29,7 @@ export const getHomePosts = async(req, res, next) => {
   const maxLimit = 10;
   const limit = Math.min(req.query.limit ? Number(req.query.limit) : maxLimit, maxLimit);
   const offset = parseInt(req.query.offset) || 0;
-  const userId = req.user?.id || null;
+  const userID = req.user?.id || null;
 
   try {
      const result = await db.query(
@@ -49,7 +49,7 @@ export const getHomePosts = async(req, res, next) => {
       GROUP BY post.id, "user".username, "user".display_name, pl_user.user_id
       ORDER BY post.created_at DESC
       LIMIT $1 OFFSET $2`,
-      [limit, offset, userId]
+      [limit, offset, userID]
     );
     return res.status(200).json(result.rows);
   } catch {
@@ -58,8 +58,8 @@ export const getHomePosts = async(req, res, next) => {
 }
 
 export const getPost = async (req, res, next) => {
-  const userId = req.user?.id || null;
-  const postId = parseInt(req.params.id);
+  const userID = req.user?.id || null;
+  const postID = parseInt(req.params.id);
 
   try {
     const result = await db.query(
@@ -82,7 +82,7 @@ export const getPost = async (req, res, next) => {
       FROM post
       JOIN "user" ON "user".id = post.user_id
       WHERE post.id = $1 AND post.is_deleted = false`,
-      [postId, userId]
+      [postID, userID]
     );
 
     if (result.rows.length === 0) {
@@ -97,13 +97,13 @@ export const getPost = async (req, res, next) => {
 };
 
 export const likePost = async(req, res, next) => {
-  const userId = req.user.id;
-  const postId = req.params.id;
+  const userID = req.user.id;
+  const postID = req.params.id;
 
   try {
     await db.query(
       `INSERT INTO post_like (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [postId, userId]
+      [postID, userID]
     );
     return res.status(200).json({ success: "liked post" });
   } catch {
@@ -112,13 +112,13 @@ export const likePost = async(req, res, next) => {
 };
 
 export const removeLikePost = async(req, res, next) => {
-  const userId = req.user.id;
-  const postId = req.params.id;
+  const userID = req.user.id;
+  const postID = req.params.id;
 
   try {
     await db.query(
       `DELETE FROM post_like WHERE post_id = $1 AND user_id = $2`,
-      [postId, userId]
+      [postID, userID]
     );
     return res.status(200).json({ success: "removed like from post" });
   } catch {

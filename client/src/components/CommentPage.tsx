@@ -1,52 +1,49 @@
-import Post from '../components/Post';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getPost } from '../api/post';
-import { useThemeStyles } from '../hooks/useThemeStyles';
-import { faArrowLeft} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { createComment, getComments } from '../api/comment';
-import { toast } from 'sonner';
-import Comment from '../components/Comment';
-import { useAuth } from '../contexts/AuthContext';
-import { useModal } from '../contexts/ModalContext';
-import type { PostData, CommentData } from '../util/types';
+import Comment from "./Comment"
+import { useParams, useNavigate } from "react-router-dom"
+import type { CommentData } from "../util/types";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { createComment, getComment, getComments } from "../api/comment";
+import { toast } from "sonner";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { useThemeStyles } from "../hooks/useThemeStyles";
+import { useAuth } from "../contexts/AuthContext";
+import { useModal } from "../contexts/ModalContext";
 
-const PostPage = () => {
+const CommentPage = () => {
   const {id} = useParams<{ id:string }>();
-  const [post ,setPost] = useState<PostData | null>(null);
+  const [mainComment, setMainComment] = useState<CommentData | null>(null);
+  const [mainCommentLoading, setMainCommentLoading] = useState(true);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [commentOffset, setCommentOffset] = useState(0);
   const [hasMoreComments, setHasMoreComments] = useState(true);
   const [isFetchingComments, setIsFetchingComments] = useState(false);
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
-  const [reply, setReply] = useState("");
-  const {borderColor} = useThemeStyles();
-  const [postLoading, setPostLoading] = useState(true);
-  const [replyLoading, setReplyLoading] = useState(false);
   const [error, setError] = useState("");
-  const { textColor } = useThemeStyles();
+  const [reply, setReply] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
   const navigator = useNavigate();
+  const { textColor, borderColor } = useThemeStyles();
   const { isLoggedIn } = useAuth();
-  const { openLogin } = useModal();  
+  const { openLogin } = useModal();
 
-  // Fetch Main Post Content
+  // Fetch Main Comment
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchMainComment = async () => {
       const parsedId = parseInt(id ?? "");
       if (isNaN(parsedId)) return;
       try {
-        const data = await getPost(parsedId);
-        setPost(data);
-      } catch (err) {
-        console.error("Error Fetching Post", err)
+        const data = await getComment(parsedId);
+        setMainComment(data);
+      } catch(err) {
+        console.error("Error Fetching Comment", err);
       } finally {
-        setPostLoading(false);
+        setMainCommentLoading(false);
       }
-    };
+    }
 
-    if (id) fetchPost();
+    if (id) fetchMainComment();
   }, [id]);
 
   // Grabs Comments when needed
@@ -57,14 +54,14 @@ const PostPage = () => {
     try {
       const parsedId = parseInt(id);
       const newComments = await getComments({
-        postId: parsedId,
+        parentId: parsedId,
         offset: commentOffset,
         limit: MAX_COMMENT_LIMIT
       });
       setComments(prev => {
         const ids = new Set(prev.map(c => c.id));
-        const uniqueNew = newComments.filter((c: { id: number; }) => !ids.has(c.id));
-        return [...prev, ...uniqueNew];
+        const uniqueNew = newComments.filter((c: { id: number}) => !ids.has(c.id));
+        return [...prev, ...uniqueNew]
       });
       setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
     } catch (err) {
@@ -93,16 +90,15 @@ const PostPage = () => {
     return () => {
       if (currentLoader) observer.unobserve(currentLoader);
     };
-  }, [hasMoreComments, isFetchingComments]);  
+  }, [hasMoreComments, isFetchingComments]); 
 
-  // Reply Call
   const handleReply = async() => {
     setError("");
     setReplyLoading(true);
     const parsedId = parseInt(id ?? "");
     if (isNaN(parsedId)) return;
     try {
-      await createComment(parsedId, reply, null);
+      await createComment(null, reply, parsedId);
       setReply("");
       toast.success("Comment Created");
     } catch (err) {
@@ -127,7 +123,7 @@ const PostPage = () => {
       {/* Post Content and Reply */}
       <section className={`border-1 p-4 ${borderColor}`}>
         <div className={`flex justify-center`}>
-          {post && <Post {...post}/>}
+          {mainComment && <Comment {...mainComment}/>}
         </div>
         {/* Reply Section */}
         <section>
@@ -165,11 +161,11 @@ const PostPage = () => {
           </div>
         </section>
       </section>
-      {/* Comments*/}
+      {/* Comments */}
       <section className={`${textColor} ${borderColor} border-x-1 border-b-1 flex flex-col`}>
-          {comments.map((comment) => (
-            <Comment key={comment.id} {...comment}/>
-          ))}
+        {comments.map((comment) => (
+          <Comment key={comment.id} {...comment}/>
+        ))}
       </section>
       {/* Reference to keep loading more comments */}
       <div className='text-white' ref={commentLoader}></div>
@@ -177,4 +173,4 @@ const PostPage = () => {
   )
 }
 
-export default PostPage
+export default CommentPage
