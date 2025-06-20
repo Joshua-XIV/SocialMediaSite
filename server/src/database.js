@@ -12,8 +12,8 @@ export const pool = new Pool({
 // Local DB
 export const pool = new Pool({
   user: process.env.DATABASE_USER,
-  host: 'localhost',
+  host: 'db',
   database: process.env.DATABASE_NAME,
   password: process.env.DATABASE_PASSWORD,
-  port: 5100,
+  port: 5432,
 });

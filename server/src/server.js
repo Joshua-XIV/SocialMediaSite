@@ -8,6 +8,8 @@ import postRoutes from './routes/postRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
+import dotenv from 'dotenv'
+dotenv.config();
 
 const port = process.env.PORT || 8001;
 const app = express();
