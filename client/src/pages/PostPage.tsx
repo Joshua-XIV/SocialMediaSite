@@ -18,7 +18,7 @@ const PostPage = () => {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [commentOffset, setCommentOffset] = useState(0);
   const [hasMoreComments, setHasMoreComments] = useState(true);
-  const [isFetchingComments, setIsFetchingComments] = useState(false);
+  const [isFetchingComments, setIsFetchingComments] = useState(true);
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
   const [reply, setReply] = useState("");
@@ -33,6 +33,7 @@ const PostPage = () => {
 
   // Fetch Main Post Content
   useEffect(() => {
+    console.log(commentOffset, "fetchPost")
     const fetchPost = async () => {
       const parsedId = parseInt(id ?? "");
       if (isNaN(parsedId)) return;
@@ -51,9 +52,9 @@ const PostPage = () => {
 
   // Grabs Comments when needed
   const fetchComments = useCallback(async () => {
-    if (!id || isFetchingComments || !hasMoreComments) return;
+    if (!id || !hasMoreComments) return;
     setIsFetchingComments(true);
-
+    console.log(commentOffset, "fetchComments")
     try {
       const parsedId = parseInt(id);
       const newComments = await getComments({
@@ -79,8 +80,16 @@ const PostPage = () => {
     fetchComments();
   }, [commentOffset]);
 
+    useEffect(() => {
+    setComments([]);
+    setCommentOffset(0);
+    setHasMoreComments(true);
+  }, [id]);
+
   // Checks to load more comments
   useEffect(() => {
+    if (!hasMoreComments || isFetchingComments || comments.length == 0) return;
+    console.log(commentOffset, "observeUseEffect")
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMoreComments && !isFetchingComments) {
         setCommentOffset(prev => prev + MAX_COMMENT_LIMIT);
@@ -93,7 +102,7 @@ const PostPage = () => {
     return () => {
       if (currentLoader) observer.unobserve(currentLoader);
     };
-  }, [hasMoreComments, isFetchingComments]);  
+  }, [hasMoreComments, isFetchingComments, commentOffset]);  
 
   // Reply Call
   const handleReply = async() => {
@@ -178,7 +187,7 @@ const PostPage = () => {
             className='text-gray-400 text-center'
             ref={commentLoader}
           >
-            {!hasMoreComments && <p>No More Comments!</p>}
+            {!hasMoreComments && !isFetchingComments && <p>No More Comments!</p>}
           </div>
         </div>
       </div>

@@ -7,12 +7,12 @@ const PostFeed = () => {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const loader = useRef(null);
   const MAX_POST_LIMIT = 10;
 
   const fetchPost = useCallback(async () => {
-    if (isFetching || !hasMore) return;
+    if (!hasMore) return;
     setIsFetching(true);
     try {
       const newPosts = await getHomePosts(MAX_POST_LIMIT, offset);
@@ -59,7 +59,7 @@ const PostFeed = () => {
         ))}
       </div>
       <div ref={loader} className= 'text-gray-400 text-center pb-4'>
-        {!hasMore && <p>No More Posts!</p>}
+        {!hasMore && !isFetching && <p>No More Posts!</p>}
       </div>
     </div>
   )

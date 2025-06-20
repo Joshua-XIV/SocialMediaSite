@@ -17,7 +17,7 @@ const CommentPage = () => {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [commentOffset, setCommentOffset] = useState(0);
   const [hasMoreComments, setHasMoreComments] = useState(true);
-  const [isFetchingComments, setIsFetchingComments] = useState(false);
+  const [isFetchingComments, setIsFetchingComments] = useState(true);
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
   const [error, setError] = useState("");
@@ -27,6 +27,8 @@ const CommentPage = () => {
   const { textColor, borderColor } = useThemeStyles();
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
+  const fetchLock = useRef(false);
+  
 
   // Fetch Main Comment
   useEffect(() => {
@@ -40,6 +42,7 @@ const CommentPage = () => {
         console.error("Error Fetching Comment", err);
       } finally {
         setMainCommentLoading(false);
+        fetchLock.current = false;
       }
     }
 
@@ -47,66 +50,81 @@ const CommentPage = () => {
   }, [id]);
 
   // Grabs Comments when needed
-  const fetchComments = useCallback(async () => {
-    if (!id || isFetchingComments || !hasMoreComments) return;
-    setIsFetchingComments(true);
-
-    try {
-      const parsedId = parseInt(id);
-      const newComments = await getComments({
-        parentId: parsedId,
-        offset: commentOffset,
-        limit: MAX_COMMENT_LIMIT
-      });
-      setComments(prev => {
-        const ids = new Set(prev.map(c => c.id));
-        const uniqueNew = newComments.filter((c: { id: number}) => !ids.has(c.id));
-        return [...prev, ...uniqueNew]
-      });
-      setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
-    } catch (err) {
-      console.error("Failed to fetch comments", err);
-    } finally {
-      setIsFetchingComments(false);
-    }
-  }, [id, commentOffset, isFetchingComments, hasMoreComments]);
-
-  // Once Offset changes, fetch comments
   useEffect(() => {
-    if (id) fetchComments();
+    if (!id || isFetchingComments || !hasMoreComments) return;
+
+    const fetchComments = async () => {
+      setIsFetchingComments(true);
+      const parsedId = parseInt(id ?? "");
+      try {
+        const newComments = await getComments({
+          parentId: parsedId,
+          offset: commentOffset,
+          limit: MAX_COMMENT_LIMIT,
+        });
+
+        setComments(prev => {
+          const ids = new Set(prev.map(c => c.id));
+          const uniqueNew = newComments.filter((c: { id: number; }) => !ids.has(c.id));
+          return [...prev, ...uniqueNew];
+        });
+
+        setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
+      } catch (err) {
+        console.error("Failed to fetch comments", err);
+      } finally {
+        setIsFetchingComments(false);
+        fetchLock.current = false;
+      }
+    };
+
+    fetchComments();
   }, [commentOffset, id]);
 
-useEffect(() => {
-  if (!id) return;
+  useEffect(() => {
+    if (!id) return;
 
-  // Reset comment data
-  setComments([]);
-  setCommentOffset(0);
-  setHasMoreComments(true);
+    // Reset comment data
+    setComments([]);
+    setCommentOffset(0);
+    fetchLock.current = false;
+    setHasMoreComments(true);
 
-  // Force initial fetch manually
-  const fetchInitial = async () => {
-    const parsedId = parseInt(id);
-    try {
-      const newComments = await getComments({
-        parentId: parsedId,
-        offset: 0,
-        limit: MAX_COMMENT_LIMIT,
-      });
-      setComments(newComments);
-      setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
-    } catch (err) {
-      console.error("Failed to fetch initial replies", err);
-    }
-  };
+    // Force initial fetch manually
+    const fetchInitial = async () => {
+      setIsFetchingComments(true);
+      const parsedId = parseInt(id);
+      try {
+        const newComments = await getComments({
+          parentId: parsedId,
+          offset: 0,
+          limit: MAX_COMMENT_LIMIT,
+        });
+        setComments(newComments);
+        setHasMoreComments(newComments.length === MAX_COMMENT_LIMIT);
+      } catch (err) {
+        console.error("Failed to fetch initial replies", err);
+      } finally {
+      setIsFetchingComments(false);
+      }
+    };
 
-  fetchInitial();
-}, [id]);
+    fetchInitial();
+  }, [id]);
 
   // Checks to load more comments
   useEffect(() => {
+    if (!hasMoreComments || isFetchingComments) return;
+    console.log(commentOffset);
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMoreComments && !isFetchingComments) {
+      const entry = entries[0];
+      if (
+        entry.isIntersecting &&
+        !isFetchingComments &&
+        hasMoreComments &&
+        !fetchLock.current
+      ) {
+        fetchLock.current = true;
         setCommentOffset(prev => prev + MAX_COMMENT_LIMIT);
       }
     }, { threshold: 1 });
@@ -117,7 +135,7 @@ useEffect(() => {
     return () => {
       if (currentLoader) observer.unobserve(currentLoader);
     };
-  }, [hasMoreComments, isFetchingComments, id]); 
+  }, [hasMoreComments, isFetchingComments, commentOffset]);
 
   const handleReply = async() => {
     setError("");
@@ -202,7 +220,7 @@ useEffect(() => {
             className='text-gray-400 text-center'
             ref={commentLoader}
           >
-            {!hasMoreComments && <p>No More Comments!</p>}
+            {!hasMoreComments && !isFetchingComments && <p>No More Comments!</p>}
           </div>
         </div>
       </div>
