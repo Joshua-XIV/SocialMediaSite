@@ -40,7 +40,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
           <p className="text-md font-bold">{`${display_name}`}</p>
           <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
         </div>
-        <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
+        <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
         <div className="flex justify-between">
           <div className="flex gap-x-3 items-center">
             <FiHeart
@@ -60,7 +60,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
           <p className="text-md font-bold">{`${display_name}`}</p>
           <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
         </div>
-        <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
+        <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
         <div className="flex justify-between">
           <div className="flex gap-x-3 items-center">
             <FiHeart

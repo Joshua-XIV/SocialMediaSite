@@ -52,12 +52,15 @@ const PostFeed = () => {
   }, [hasMore, isFetching]);
 
   return (
-    <div className='flex flex-col px-3 w-full h-[calc(100vh-3rem)] p-4 items-center gap-y-3'>
-      {posts.map((post) => (
-        <Post key={post.id} {...post}/>
-      ))}
-      <div ref={loader} className='h-2'/>
-      {!hasMore && <p>No More Posts!</p>}
+    <div className='flex flex-col px-3 w-full h-[calc(100vh-3rem)]'>
+      <div className='flex flex-col p-4 items-center gap-y-3'>
+        {posts.map((post) => (
+          <Post key={post.id} {...post}/>
+        ))}
+      </div>
+      <div ref={loader} className= 'text-gray-400 text-center pb-4'>
+        {!hasMore && <p>No More Posts!</p>}
+      </div>
     </div>
   )
 }
