@@ -110,7 +110,7 @@ const CommentPage = () => {
   }
 
   return (
-    <>
+    <div className="px-4">
       {/* Navigate Backwards */}
       <section className='py-3'>
         <div
@@ -169,7 +169,7 @@ const CommentPage = () => {
       </section>
       {/* Reference to keep loading more comments */}
       <div className='text-white' ref={commentLoader}></div>
-    </>
+    </div>
   )
 }
 

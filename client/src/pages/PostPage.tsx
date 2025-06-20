@@ -114,7 +114,7 @@ const PostPage = () => {
   }
 
   return (
-    <>
+    <div className='px-4'>
       {/* Navigate Backwards */}
       <section className='py-3'>
         <div
@@ -173,7 +173,7 @@ const PostPage = () => {
       </section>
       {/* Reference to keep loading more comments */}
       <div className='text-white' ref={commentLoader}></div>
-    </>
+    </div>
   )
 }
 

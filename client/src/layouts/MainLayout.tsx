@@ -26,7 +26,7 @@ const MainLayout = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1000);
     };
 
     handleResize();
@@ -47,7 +47,7 @@ const MainLayout = () => {
       <Background />
       {!isLoading && (
         <>
-          <NavBar />
+          <NavBar isMobile={isMobile} openSideBar={() => setSideBarOpen((prev) => !prev)}/>
           <div className="pt-[3em] flex">
             {
               <SideBar

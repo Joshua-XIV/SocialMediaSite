@@ -8,13 +8,17 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import CogWindow from "./CogWindow";
 import HomeIcon from '../assets/home.svg?react';
+import SideBarIcon from "../assets/sidebar.svg?react"
 import CreatePostWindow from './CreatePostWindow';
 import { Link } from 'react-router-dom';
 import { useModal } from '../contexts/ModalContext';
 
 // Starting to become Div & Effect Soup, need to just refactor and put some stuff into components
-
-const NavBar = () => {
+interface NavBarProps {
+  isMobile: boolean;
+  openSideBar: () => void;
+}
+const NavBar = ({isMobile, openSideBar} : NavBarProps) => {
   const { theme } = useTheme();
   const { isLoggedIn, displayName } = useAuth();
   const { bgColor, bgAntiColor, textColor, borderColor } = useThemeStyles();
@@ -73,10 +77,17 @@ const NavBar = () => {
                   z-10 flex justify-between items-center px-6 space-x-2 ${textColor}`}
         style={{backgroundColor : bgColor }}
       >
-        {/* Home */}
-        <Link to={'/'} className={`hover:cursor-pointer flex items-center`}>
-          <HomeIcon {...{fill : bgAntiColor, width: 28, height: 28} as React.SVGProps<SVGSVGElement>}/>
-        </Link>
+        {/* Home And SideBar*/}
+        <div className='flex items-center justify-center gap-x-4'>
+          {isMobile && 
+            <button className='hover:cursor-pointer' onClick={openSideBar}>
+              <SideBarIcon {...{fill : bgAntiColor, fontSize: 40} as React.SVGProps<SVGSVGElement>}/>
+            </button>
+          }
+          <Link to={'/'} className={`hover:cursor-pointer flex items-center`}>
+            <HomeIcon {...{fill : bgAntiColor, width: 28, height: 28} as React.SVGProps<SVGSVGElement>}/>
+          </Link>
+        </div>
         {/* Search */}
         <div className={`${borderColor} border-2 px-3 py-0.5 rounded-3xl w-2xs sm:w-xs md:w-md opacity-80 hover:opacity-100`}>
             <input 
