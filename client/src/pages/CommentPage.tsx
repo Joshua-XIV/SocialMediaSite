@@ -1,4 +1,4 @@
-import Comment from "./Comment"
+import Comment from "../components/Comment"
 import { useParams, useNavigate } from "react-router-dom"
 import type { CommentData } from "../util/types";
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -73,8 +73,14 @@ const CommentPage = () => {
 
   // Once Offset changes, fetch comments
   useEffect(() => {
-    fetchComments();
-  }, [commentOffset]);
+    if (id) fetchComments();
+  }, [commentOffset, id]);
+
+  useEffect(() => {
+    setComments([]);
+    setCommentOffset(0);
+    setHasMoreComments(true);
+  }, [id]);
 
   // Checks to load more comments
   useEffect(() => {

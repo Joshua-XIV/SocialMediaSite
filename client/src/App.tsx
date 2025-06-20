@@ -3,7 +3,7 @@ import { Toaster } from 'sonner';
 import HomePage from "./pages/HomePage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
 import PostPage from "./pages/PostPage.tsx"
-import CommentPage from "./components/CommentPage.tsx";
+import CommentPage from "./pages/CommentPage.tsx";
 
 const router = createBrowserRouter([
   {

@@ -124,55 +124,64 @@ const PostPage = () => {
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
       </section>
-      {/* Post Content and Reply */}
-      <section className={`border-1 p-4 ${borderColor}`}>
-        <div className={`flex justify-center`}>
-          {post && <Post {...post}/>}
-        </div>
-        {/* Reply Section */}
-        <section>
-          <textarea
-            className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`}
-            placeholder='Reply'
-            value={reply}
-            onChange={(e) => {
-              setReply(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height = e.target.scrollHeight + "px";
-            }}
-            style={{overflow : 'hidden'}}
+      <div className='pb-2'>
+        <div className={`border-1 rounded-2xl ${borderColor}`}>
+          {/* Post Content and Reply */}
+          <section className={`p-4 ${borderColor} border-b-1`}>
+            <div className={`flex justify-center`}>
+              {post && <Post {...post}/>}
+            </div>
+            {/* Reply Section */}
+            <section>
+              <textarea
+                className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`}
+                placeholder='Reply'
+                value={reply}
+                onChange={(e) => {
+                  setReply(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = e.target.scrollHeight + "px";
+                }}
+                style={{overflow : 'hidden'}}
+              >
+              </textarea>
+              <div className={`flex justify-end items-center gap-x-4 pb-1`}>
+                <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
+                <button
+                  className={`flex justify-center items-center border-1 ${borderColor} rounded-xl p-1 ${textColor} w-12
+                              ${reply.length > 255 || reply.length == 0 ? "" : "hover:cursor-pointer"}
+                              ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
+                              ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
+                  disabled={reply.length > 255}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (isLoggedIn) {
+                      handleReply();
+                    } else {
+                      (openLogin("login"));
+                    }
+                  }}
+                >
+                  SEND
+                </button>
+              </div>
+            </section>
+          </section>
+          {/* Comments*/}
+          <section className={`${textColor} ${borderColor} flex flex-col`}>
+              {comments.map((comment) => (
+                <Comment key={comment.id} {...comment}/>
+              ))}
+          </section>
+          {/* Reference to keep loading more comments */}
+          <div
+            className='text-gray-400 text-center'
+            ref={commentLoader}
           >
-          </textarea>
-          <div className={`flex justify-end items-center gap-x-4 pb-1`}>
-            <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
-            <button
-              className={`flex justify-center items-center border-1 ${borderColor} rounded-xl p-1 ${textColor} w-12
-                          ${reply.length > 255 || reply.length == 0 ? "" : "hover:cursor-pointer"}
-                          ${reply.length > 255 || reply.length == 0 ? "bg-transparent": "bg-blue-500"}
-                          ${reply.length > 255 || reply.length == 0 ? "opacity-80" : "opacity-80 hover:opacity-100"}`}
-              disabled={reply.length > 255}
-              onClick={(e) => {
-                e.preventDefault();
-                if (isLoggedIn) {
-                  handleReply();
-                } else {
-                  (openLogin("login"));
-                }
-              }}
-            >
-              SEND
-            </button>
+            {!hasMoreComments && <p>No More Comments!</p>}
           </div>
-        </section>
-      </section>
-      {/* Comments*/}
-      <section className={`${textColor} ${borderColor} border-x-1 border-b-1 flex flex-col`}>
-          {comments.map((comment) => (
-            <Comment key={comment.id} {...comment}/>
-          ))}
-      </section>
-      {/* Reference to keep loading more comments */}
-      <div className='text-white' ref={commentLoader}></div>
+        </div>
+      </div>
     </div>
   )
 }

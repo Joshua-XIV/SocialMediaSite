@@ -19,7 +19,7 @@ const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
         {/* Backdrop */}
         {sideBarOpen && (
           <div
-            className="fixed top-[3rem] left-0 right-0 bottom-0 bg-transparent bg-opacity-40 z-40"
+            className="fixed top-[3rem] left-0 right-0 bottom-0 bg-transparent bg-opacity-40 z-30"
             onClick={action}
           />
         )}
@@ -33,7 +33,9 @@ const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
             boxShadow: "2px 0 8px rgba(0,0,0,0.3)",
           }}
         >
-          <SideBarContent></SideBarContent>
+        <div style={{ opacity: sideBarOpen ? 1 : 0, pointerEvents: sideBarOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+          <SideBarContent />
+        </div>
         </div>
       </>
     );
@@ -49,7 +51,9 @@ const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
         backgroundColor: backgroundLayer,
       }}
     >
-      <SideBarContent></SideBarContent>
+      <div style={{ opacity: sideBarOpen ? 1 : 0, pointerEvents: sideBarOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+        <SideBarContent />
+      </div>
       <button
         onClick={action}
         className={`absolute w-8 h-8 top-1/2 -translate-y-1/2 rounded-full border-2 ${borderColor} hover:cursor-pointer transition-all duration-500`}

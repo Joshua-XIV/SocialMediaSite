@@ -9,7 +9,7 @@ import { Link, useLocation } from "react-router-dom";
 import type { PostData } from "../util/types";
 
 const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostData) => {
-  const { textColor, postTextColor, borderColor } = useThemeStyles();
+  const { textColor, postTextColor, borderColor, bgColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();
@@ -32,8 +32,8 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   return (
     <>
       {!onPage && <Link
-        className={`border-b-2 p-2 ${borderColor} w-full opacity-80 hover:opacity-100 hover:bg-gray-500/20`}
-        style={{}}
+        className={`border-2 rounded-2xl p-2 ${borderColor} w-full opacity-80 hover:opacity-100 hover:bg-gray-500/20`}
+        style={{background : bgColor}}
         to={`/post/${id}`}
         >
         <div className={`${textColor} flex items-center gap-x-2`}>

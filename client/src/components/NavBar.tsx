@@ -74,7 +74,7 @@ const NavBar = ({isMobile, openSideBar} : NavBarProps) => {
     <>
       <div
         className={`fixed top-0 left-0 w-screen h-[3rem] border-b-2 ${borderColor} 
-                  z-10 flex justify-between items-center px-6 space-x-2 ${textColor}`}
+                  z-50 flex justify-between items-center px-6 space-x-2 ${textColor}`}
         style={{backgroundColor : bgColor }}
       >
         {/* Home And SideBar*/}
