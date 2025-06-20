@@ -60,7 +60,7 @@ const MainLayout = () => {
               className="flex justify-center w-full h-full"
               style={{
                 paddingLeft: !isMobile ? (sideBarOpen ? "16rem" : "4rem") : undefined,
-                transition: "padding-left 0.5s ease",
+                transition: "padding-left 0.5s",
               }}
             >
               <div className="w-full max-w-4xl"><Outlet/></div>

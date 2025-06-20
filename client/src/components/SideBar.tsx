@@ -33,7 +33,12 @@ const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
             boxShadow: "2px 0 8px rgba(0,0,0,0.3)",
           }}
         >
-        <div style={{ opacity: sideBarOpen ? 1 : 0, pointerEvents: sideBarOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+        <div 
+          style={{ 
+            opacity: sideBarOpen ? 1 : 0, 
+            pointerEvents: sideBarOpen ? 'auto' : 'none',  
+            transition: 'opacity 0.3s'
+          }}>
           <SideBarContent />
         </div>
         </div>
@@ -51,7 +56,12 @@ const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
         backgroundColor: backgroundLayer,
       }}
     >
-      <div style={{ opacity: sideBarOpen ? 1 : 0, pointerEvents: sideBarOpen ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+      <div 
+        style={{ 
+          opacity: sideBarOpen ? 1 : 0, 
+          pointerEvents: sideBarOpen ? 'auto' : 'none', 
+          transform: sideBarOpen ? 'translateX(0)' : 'translateX(-80px)',
+          transition: 'opacity 0.3s ease, transform 0.5s ease' }}>
         <SideBarContent />
       </div>
       <button
