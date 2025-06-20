@@ -38,7 +38,7 @@ const FormLayout = ({ authView, setAuthView, onClose }: FormLayoutProps) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-10">
+    <div className="fixed inset-0 bg-black/50 z-50">
       <div
         ref={loginRef}
         className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow w-md z-20 rounded-3xl flex flex-col`}

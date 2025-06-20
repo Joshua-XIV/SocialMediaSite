@@ -1,4 +1,4 @@
-import { useState, type RefObject } from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 import CloseIcon from '../assets/close.svg?react'
 import { useThemeStyles } from '../hooks/useThemeStyles'
 import { createPost } from '../api/post';
@@ -13,6 +13,21 @@ const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
   const { textColor, hoverColor, bgAntiColor, popupColor, borderColor} = useThemeStyles();
   const [post, setPost] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!post.trim()) return;
+    
+    const handleEnter = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        handlePosts();
+      }
+    };
+
+    document.addEventListener("keydown", handleEnter)
+    return () => {
+      document.removeEventListener("keydown", handleEnter)
+    }
+  }, [])
 
   const handlePosts = async() => {
     setError("");
@@ -33,7 +48,7 @@ const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
 
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-10">
+    <div className="fixed inset-0 bg-black/50 z-50">
       <div
         className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow w-md md:w-2xl z-20 rounded-3xl flex flex-col px-6`}
         style={{ height : '100vh', maxHeight : '34rem', backgroundColor : popupColor}}
@@ -76,12 +91,15 @@ const CreatePostWindow = ({closePost, loginRef} : CreatePostWindowProps) => {
             disabled={!post || post.length > 255}
             onClick={handlePosts}
             className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
-                        ${(!post || post.length > 255)? '' : 'hover:cursor-pointer'}
-                        ${(!post || post.length > 255) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
-                        ${(!post || post.length > 255) ? hoverColor : 'bg-blue-600'}`}
+                        ${(!post.trim() || post.length > 255)? '' : 'hover:cursor-pointer'}
+                        ${(!post.trim()  || post.length > 255) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
+                        ${(!post.trim()  || post.length > 255) ? hoverColor : 'bg-blue-600'}`}
           >
             Send
           </button>
+        </div>
+        <div className='text-red-400'>
+          {error}
         </div>
       </div>
     </div>

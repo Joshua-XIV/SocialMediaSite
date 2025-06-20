@@ -9,7 +9,7 @@ interface SideBarProps {
 
 const SideBar = ({ action, sideBarOpen, isMobile }: SideBarProps) => {
   const { textColor, borderColor, backgroundLayer } = useThemeStyles();
-  const baseStyles = "top-[3rem] h-[calc(100vh-3rem)] z-50 transition-all duration-500";
+  const baseStyles = "top-[3rem] h-[calc(100vh-3rem)] z-40 transition-all duration-500";
 
 
   if (isMobile) {
