@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
 import PostPage from "./pages/PostPage.tsx"
 import CommentPage from "./pages/CommentPage.tsx";
+import JobPage from "./pages/JobPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -12,7 +13,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: '/post/:id', element: <PostPage/>},
-      { path: '/comment/:id', element: <CommentPage/>}
+      { path: '/comment/:id', element: <CommentPage/>},
+      { path: '/jobs', element: <JobPage/>}
     ],
   },
 ]);
