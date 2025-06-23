@@ -28,7 +28,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
     }
   };
 
-  const onPage = location.pathname === `/post/${id}`
+  const onPage = location.pathname !== `/`
   return (
     <>
       {!onPage && <Link

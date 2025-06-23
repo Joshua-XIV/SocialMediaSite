@@ -58,7 +58,7 @@ const PostPage = () => {
     try {
       const parsedId = parseInt(id);
       const newComments = await getComments({
-        postId: parsedId,
+        postID: parsedId,
         offset: commentOffset,
         limit: MAX_COMMENT_LIMIT
       });
@@ -77,8 +77,10 @@ const PostPage = () => {
 
   // Once Offset changes, fetch comments
   useEffect(() => {
-    fetchComments();
-  }, [commentOffset]);
+    if (id) {
+      fetchComments();
+    }
+  }, [commentOffset, id]);
 
     useEffect(() => {
     setComments([]);

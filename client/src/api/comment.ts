@@ -32,21 +32,21 @@ export async function getComment(commentID: number) {
 
 export async function getComments(
   options: {
-    postId?: number;
-    parentId?: number;
+    postID?: number;
+    parentID?: number;
     limit?: number;
     offset?: number;
   }
 ) {
-  const { postId, parentId, limit = 10, offset = 0 } = options;
+  const { postID, parentID, limit = 10, offset = 0 } = options;
 
-  if (!postId && !parentId) {
-    throw new Error("Must provide either postId or parentId");
+  if (!postID && !parentID) {
+    throw new Error("Must provide either postID or parentID");
   }
 
   const params = new URLSearchParams();
-  if (postId !== undefined) params.append("postId", postId.toString());
-  if (parentId !== undefined) params.append("parentId", parentId.toString());
+  if (postID !== undefined) params.append("postID", postID.toString());
+  if (parentID !== undefined) params.append("parentID", parentID.toString());
   if (limit) params.append("limit", limit.toString());
   if (offset) params.append("offset", offset.toString());
 
@@ -87,6 +87,21 @@ export async function removeLikeComment (commentID: string | number) {
   if (!res.ok) {
     const { error } = await res.json();
     throw new Error(error || "Failed to remove like from comment");
+  }
+
+  return res.json();
+}
+
+export async function getCommentThread (commentID: string | number) {
+  const res = await fetch(`${API_URL}/api/comment/${commentID}/comment-thread`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to get comment thread");
   }
 
   return res.json();

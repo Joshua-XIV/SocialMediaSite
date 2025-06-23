@@ -21,9 +21,9 @@ export const createComment = async(req, res, next) => {
     let comment;
     if (parentID) {
       comment = await db.query(`
-        INSERT INTO comment (user_id, content, parent_id)
+        INSERT INTO comment (user_id, content, parent_id, post_id)
         VALUES ($1, $2, $3) RETURNING *`,
-        [userID, content, parentID]
+        [userID, content, parentID, postID]
       );
     } else {
       comment = await db.query(`
@@ -40,8 +40,8 @@ export const createComment = async(req, res, next) => {
 }
 
 export const getComment = async (req, res, next) => {
-  const userId = req.user?.id || null;
-  const commentId = parseInt(req.params.id);
+  const userID = req.user?.id || null;
+  const commentID = parseInt(req.params.id);
 
   try {
     const result = await db.query(
@@ -60,7 +60,7 @@ export const getComment = async (req, res, next) => {
       LEFT JOIN comment_like cl_user ON cl_user.comment_id = c.id AND cl_user.user_id = $2
       WHERE c.id = $1 AND c.is_deleted = false
       GROUP BY c.id, "user".username, "user".display_name, cl_user.user_id`,
-      [commentId, userId]
+      [commentID, userID]
     );
 
     if (result.rows.length === 0) {
@@ -75,23 +75,25 @@ export const getComment = async (req, res, next) => {
 };
 
 export const getComments = async (req, res, next) => {
-  const userId = req.user?.id || null;
+  const userID = req.user?.id || null;
 
-  const postId = req.query.postId ? parseInt(req.query.postId) : null;
-  const parentId = req.query.parentId ? parseInt(req.query.parentId) : null;
+  const postID = req.query.postID ? parseInt(req.query.postID) : null;
+  const parentID = req.query.parentID ? parseInt(req.query.parentID) : null;
   const maxLimit = 10;
   const limit = Math.min(parseInt(req.query.limit), maxLimit);
   const offset = parseInt(req.query.offset) || 0;
 
-  if (!postId && !parentId) {
-    return next(new HttpError("Must provide either postId or parentId", 400));
+  console.log("Calling getComments with:", { postID, parentID, limit, offset });
+
+  if (!postID && !parentID) {
+    return next(new HttpError("Must provide either postID or parentID", 400));
   }
 
   try {
     let query;
     let params;
 
-    if (parentId) {
+    if (parentID) {
       // Fetch replies to a specific comment
       query = `
         SELECT c.id, c.content, c.created_at, c.parent_id,
@@ -107,7 +109,7 @@ export const getComments = async (req, res, next) => {
         ORDER BY c.created_at ASC
         LIMIT $3 OFFSET $4
       `;
-      params = [parentId, userId, limit, offset];
+      params = [parentID, userID, limit, offset];
     } else {
       // Fetch top-level comments on a post
       query = `
@@ -124,7 +126,7 @@ export const getComments = async (req, res, next) => {
         ORDER BY c.created_at ASC
         LIMIT $3 OFFSET $4
       `;
-      params = [postId, userId, limit, offset];
+      params = [postID, userID, limit, offset];
     }
 
     const result = await db.query(query, params);
@@ -166,7 +168,7 @@ export const removeLikeComment = async(req, res, next) => {
 };
 
 export const getCommentThread = async (req, res, next) => {
-  const commentId = req.params.id;
+  const commentID = req.params.id;
   
   try {
     const result = await db.query(`
@@ -181,10 +183,18 @@ export const getCommentThread = async (req, res, next) => {
         SELECT comment.*, "user".username, "user".display_name
         FROM comment
         JOIN "user" ON "user".id = comment.user_id
-        INNER JOIN comment_chain ORDER BY created_at ASC;
-      )`, [commentId]);
+        INNER JOIN comment_chain ON comment_chain.parent_id = comment.id
+      )
+      SELECT * FROM comment_chain ORDER BY created_at ASC;`
+      , [commentID]);
 
-      return res.status(200).json(result.rows);
+    const thread = result.rows;
+    const root = thread.find(c => c.post_id !== null);
+
+    return res.status(200).json({
+      post_id: root?.post_id || null,
+      thread 
+    })
   } catch (err) {
     console.error("DB Error: ", err.message);
     return next(new HttpError("Failed to fetch comment thread", 500));

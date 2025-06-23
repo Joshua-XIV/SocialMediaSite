@@ -1,14 +1,17 @@
 import Comment from "../components/Comment"
 import { useParams, useNavigate } from "react-router-dom"
-import type { CommentData } from "../util/types";
-import { useCallback, useEffect, useState, useRef } from "react";
-import { createComment, getComment, getComments } from "../api/comment";
+import { type PostData, type CommentData } from "../util/types";
+import { useEffect, useState, useRef } from "react";
+import { createComment, getComment, getComments, getCommentThread } from "../api/comment";
 import { toast } from "sonner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
+import { parse } from "@fortawesome/fontawesome-svg-core";
+import { getPost } from "../api/post";
+import Post from "../components/Post";
 
 const CommentPage = () => {
   const {id} = useParams<{ id:string }>();
@@ -28,6 +31,9 @@ const CommentPage = () => {
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
   const fetchLock = useRef(false);
+  const [thread, setThread] = useState<CommentData[]>([]);
+  const [postID, setPostID] = useState<number | null>(null);
+  const [post, setPost] = useState<PostData | null>(null);
   
 
   // Fetch Main Comment
@@ -58,7 +64,7 @@ const CommentPage = () => {
       const parsedId = parseInt(id ?? "");
       try {
         const newComments = await getComments({
-          parentId: parsedId,
+          parentID: parsedId,
           offset: commentOffset,
           limit: MAX_COMMENT_LIMIT,
         });
@@ -96,7 +102,7 @@ const CommentPage = () => {
       const parsedId = parseInt(id);
       try {
         const newComments = await getComments({
-          parentId: parsedId,
+          parentID: parsedId,
           offset: 0,
           limit: MAX_COMMENT_LIMIT,
         });
@@ -154,6 +160,40 @@ const CommentPage = () => {
     }
   }
 
+  useEffect(() => {
+    const fetchThread = async () => {
+      const parsedId = parseInt(id ?? "");
+      if (isNaN(parsedId)) return;
+      try {
+        const data = await getCommentThread(parsedId);
+        setThread(data.thread);
+        setPostID(data.post_id)
+        setMainComment(data.thread[data.thread.length - 1]);
+      } catch (err) {
+        console.error("Error fetching comment thread", err);
+      } finally {
+        setMainCommentLoading(false);
+        fetchLock.current = false;
+      }
+    }
+
+    if (id) fetchThread();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (postID == null) return;
+      try {
+        const postData = await getPost(postID);
+        setPost(postData);
+      } catch (err) {
+        console.error("Error fetching post", err);
+      }
+    };
+
+    fetchPost();
+  }, [postID]);
+
   return (
     <div className="px-4">
       {/* Navigate Backwards */}
@@ -170,8 +210,11 @@ const CommentPage = () => {
         <div className={`border-1 rounded-2xl ${borderColor}`}>
           {/* Post Content and Reply */}
           <section className={`border-b-1 p-4 ${borderColor}`}>
-            <div className={`flex justify-center`}>
-              {mainComment && <Comment {...mainComment}/>}
+            <div className={`flex justify-center flex-col`}>
+              {post && <Post {...post}/>}
+              {thread.map((c) => (
+                <Comment key={c.id} {...c} />
+              ))}
             </div>
             {/* Reply Section */}
             <section>
