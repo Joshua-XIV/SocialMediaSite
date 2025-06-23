@@ -21,9 +21,9 @@ export const createComment = async(req, res, next) => {
     let comment;
     if (parentID) {
       comment = await db.query(`
-        INSERT INTO comment (user_id, content, parent_id, post_id)
+        INSERT INTO comment (user_id, content, parent_id)
         VALUES ($1, $2, $3) RETURNING *`,
-        [userID, content, parentID, postID]
+        [userID, content, parentID]
       );
     } else {
       comment = await db.query(`

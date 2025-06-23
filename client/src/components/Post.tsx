@@ -7,6 +7,7 @@ import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import type { PostData } from "../util/types";
+import { useNavigate } from "react-router-dom";
 
 const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostData) => {
   const { textColor, postTextColor, borderColor, bgColor } = useThemeStyles();
@@ -16,6 +17,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   const { openLogin } = useModal();
   const location = useLocation();
   const heartColor = 'red';
+  const navigate =  useNavigate();
 
   const handleToggleLike = async () => {
     setIsLiked(prev => !prev);
@@ -28,10 +30,11 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
     }
   };
 
-  const onPage = location.pathname !== `/`
+  const homePage = location.pathname === `/`
+  const commentPage = location.pathname.startsWith("/comment/");
   return (
     <>
-      {!onPage && <Link
+      {homePage && <Link
         className={`border-2 rounded-2xl p-2 ${borderColor} w-full opacity-80 hover:opacity-100 hover:bg-gray-500/20`}
         style={{background : bgColor}}
         to={`/post/${id}`}
@@ -52,9 +55,10 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
           </div>
         </div>
       </Link>}
-      {onPage && <div
-        className={`border-b-1 p-2 ${borderColor} w-full`}
+      {!homePage && <div
+        className={`border-b-1 p-2 ${borderColor} w-full ${commentPage ? "hover:cursor-pointer hover:bg-gray-500/20" : ""}`}
         style={{}}
+        onClick={() => {if (commentPage) {navigate(`/post/${id}`)}}}
         >
         <div className={`${textColor} flex items-center gap-x-2`}>
           <p className="text-md font-bold">{`${display_name}`}</p>

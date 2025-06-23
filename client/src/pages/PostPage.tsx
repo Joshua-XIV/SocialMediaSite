@@ -125,16 +125,16 @@ const PostPage = () => {
   }
 
   return (
-    <div className='px-4'>
+    <div className='px-4 pt-2'>
       {/* Navigate Backwards */}
-      <section className='py-3'>
+      {/*<section className='py-3'>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center`}
           onClick={() => navigator(-1)}
         >
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
-      </section>
+      </section>*/}
       <div className='pb-2'>
         <div className={`border-1 rounded-2xl ${borderColor}`}>
           {/* Post Content and Reply */}

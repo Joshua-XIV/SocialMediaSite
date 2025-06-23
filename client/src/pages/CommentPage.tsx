@@ -34,6 +34,7 @@ const CommentPage = () => {
   const [thread, setThread] = useState<CommentData[]>([]);
   const [postID, setPostID] = useState<number | null>(null);
   const [post, setPost] = useState<PostData | null>(null);
+  const mainCommentRef = useRef<HTMLDivElement | null>(null);
   
 
   // Fetch Main Comment
@@ -194,10 +195,21 @@ const CommentPage = () => {
     fetchPost();
   }, [postID]);
 
+  useEffect(() => {
+    if (mainCommentRef.current) {
+      const element = mainCommentRef.current;
+      const yOffset = -48; // 48px is 3rem
+
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({ top: y, behavior: "instant" });
+    }
+  }, [thread, mainComment]);
+
   return (
-    <div className="px-4">
+    <div className="px-4 pt-2">
       {/* Navigate Backwards */}
-      <section className='py-3'>
+      {/*<section className='py-3 z-50 sticky w-full top-0 left-0'>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 
                       rounded-full flex items-center justify-center`}
@@ -205,16 +217,19 @@ const CommentPage = () => {
         >
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
-      </section>
+      </section>*/}
       <div className="pb-2">
         <div className={`border-1 rounded-2xl ${borderColor}`}>
           {/* Post Content and Reply */}
           <section className={`border-b-1 p-4 ${borderColor}`}>
             <div className={`flex justify-center flex-col`}>
               {post && <Post {...post}/>}
-              {thread.map((c) => (
-                <Comment key={c.id} {...c} />
+              {thread.filter(c => c.id !== mainComment?.id).map((c) => (
+                <div key={c.id} className="flex">
+                  <Comment {...c} />
+                </div>
               ))}
+              <div ref={mainCommentRef} className="flex w-full h-full">{mainComment && <Comment {...mainComment}/>}</div>
             </div>
             {/* Reply Section */}
             <section>
@@ -253,17 +268,19 @@ const CommentPage = () => {
             </section>
           </section>
           {/* Comments */}
-          <section className={`${textColor} ${borderColor} border-b-1 flex flex-col`}>
-            {comments.map((comment) => (
-              <Comment key={comment.id} {...comment}/>
-            ))}
-          </section>
-          {/* Reference to keep loading more comments */}
-          <div
-            className='text-gray-400 text-center'
-            ref={commentLoader}
-          >
-            {!hasMoreComments && !isFetchingComments && <p>No More Comments!</p>}
+          <div className="h-screen">
+            <section className={`${textColor} ${borderColor} border-b-1 flex flex-col`}>
+              {comments.map((comment) => (
+                <Comment key={comment.id} {...comment}/>
+              ))}
+            </section>
+            {/* Reference to keep loading more comments */}
+            <div
+              className='text-gray-400 text-center'
+              ref={commentLoader}
+            >
+              {!hasMoreComments && !isFetchingComments && <p>No More Comments!</p>}
+            </div>
           </div>
         </div>
       </div>
