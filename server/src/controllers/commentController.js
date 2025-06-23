@@ -164,3 +164,29 @@ export const removeLikeComment = async(req, res, next) => {
     next(new HttpError("Something went wrong", 500));
   }
 };
+
+export const getCommentThread = async (req, res, next) => {
+  const commentId = req.params.id;
+  
+  try {
+    const result = await db.query(`
+      WITH RECURSIVE comment_chain AS (
+        SELECT comment.*, "user".username, "user".display_name
+        FROM comment
+        JOIN "user" ON "user".id = comment.user_id
+        WHERE comment.id = $1
+
+        UNION ALL
+
+        SELECT comment.*, "user".username, "user".display_name
+        FROM comment
+        JOIN "user" ON "user".id = comment.user_id
+        INNER JOIN comment_chain ORDER BY created_at ASC;
+      )`, [commentId]);
+
+      return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("DB Error: ", err.message);
+    return next(new HttpError("Failed to fetch comment thread", 500));
+  }
+}

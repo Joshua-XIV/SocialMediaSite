@@ -29,10 +29,10 @@ app.use(logger);
 
 // Routes
 app.use('/api', posts);
-app.use('/api', authRoutes);
-app.use('/api', userRoutes);
-app.use('/api', postRoutes);
-app.use('/api', commentRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
 
 //Error Handler
 app.use(errorHandler)

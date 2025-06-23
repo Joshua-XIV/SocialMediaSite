@@ -4,6 +4,6 @@ import { userInfo } from '../controllers/userController.js';
  
 const router = express.Router();
 
-router.get('/user/user-info', authenticate, userInfo);
+router.get('/user-info', authenticate, userInfo);
 
 export default router;
