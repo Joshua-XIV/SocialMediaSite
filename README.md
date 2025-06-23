@@ -59,6 +59,7 @@ Features are being added incrementally with a focus on clean architecture, modul
 - **Node.js**
 - **Express.js**
 - **PostgreSQL**
+- **Docker**
 
 ---
 
