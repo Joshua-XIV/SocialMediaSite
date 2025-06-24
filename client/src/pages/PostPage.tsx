@@ -145,7 +145,7 @@ const PostPage = () => {
             {/* Reply Section */}
             <section>
               <textarea
-                className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full`}
+                className={`${reply.length > 255 ? "text-red-400" : textColor} focus:outline-none p-2 resize-none w-full placeholder:text-gray-400`}
                 placeholder='Reply'
                 value={reply}
                 onChange={(e) => {

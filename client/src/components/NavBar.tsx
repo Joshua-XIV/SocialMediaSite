@@ -25,7 +25,7 @@ const NavBar = ({isMobile, openSideBar} : NavBarProps) => {
   const [openCog, setOpenCog] = useState(false);
   const [renderCog, setRenderCog] = useState(false);
   const [openCreatePost, setOpenCreatePost] = useState(false);
-  const [, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const loginRef = useRef<HTMLDivElement>(null);
   const cogRef = useRef<HTMLDivElement>(null);
   const cogColor = theme === 0 ? "black" : "white";
