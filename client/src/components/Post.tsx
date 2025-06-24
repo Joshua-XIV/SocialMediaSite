@@ -10,7 +10,7 @@ import type { PostData } from "../util/types";
 import { useNavigate } from "react-router-dom";
 
 const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostData) => {
-  const { textColor, postTextColor, borderColor, bgColor } = useThemeStyles();
+  const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
   const { isLoggedIn } = useAuth();
@@ -35,45 +35,59 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
   return (
     <>
       {homePage && <Link
-        className={`border-2 rounded-2xl p-2 ${borderColor} w-full opacity-80 hover:opacity-100 hover:bg-gray-500/20`}
-        style={{background : bgColor}}
+        className={`border-2 rounded-2xl p-2 ${borderColor} w-full hover:bg-gray-500/20`}
         to={`/post/${id}`}
-        >
-        <div className={`${textColor} flex items-center gap-x-2`}>
-          <p className="text-md font-bold">{`${display_name}`}</p>
-          <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
-        </div>
-        <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
-        <div className="flex justify-between">
-          <div className="flex gap-x-3 items-center">
-            <FiHeart
-              className="heart hover:cursor-pointer"
-              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
-              onClick={(e) => {e.preventDefault(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
-            />
-              <p className={`text-gray-400`}>{likeCount}</p>
+      >
+        <div className="flex-row items-start space-x-2">
+          <div className={`bg-red-500 flex items-center justify-center ${textColor} border-2 ${borderColor} rounded-full w-14 h-14 shrink-0`}>
+            PFP
           </div>
+          <section>
+            <div className={`${textColor} flex items-center gap-x-2`}>
+              <p className="text-md font-bold">{`${display_name}`}</p>
+              <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
+            </div>
+            <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
+            <div className="flex justify-between">
+              <div className="flex gap-x-3 items-center">
+                <FiHeart
+                  className="heart hover:cursor-pointer"
+                  style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`}}
+                  onClick={(e) => {e.preventDefault(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
+                />
+                  <p className={`text-gray-400`}>{likeCount}</p>
+              </div>
+            </div>
+          </section>
         </div>
       </Link>}
-      {!homePage && <div
+      {!homePage && 
+      <div
         className={`border-b-1 p-2 ${borderColor} w-full ${commentPage ? "hover:cursor-pointer hover:bg-gray-500/20" : ""}`}
         style={{}}
         onClick={() => {if (commentPage) {navigate(`/post/${id}`)}}}
-        >
-        <div className={`${textColor} flex items-center gap-x-2`}>
-          <p className="text-md font-bold">{`${display_name}`}</p>
-          <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
-        </div>
-        <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
-        <div className="flex justify-between">
-          <div className="flex gap-x-3 items-center">
-            <FiHeart
-              className="heart hover:cursor-pointer"
-              style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`, backgroundSize : 150}}
-              onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
-            />
-            <p className={`text-gray-400`}>{likeCount}</p>
+      >
+        <div className="flex flex-row items-start space-x-2">
+          <div className={`bg-red-500 flex items-center justify-center ${textColor} border-2 ${borderColor} rounded-full w-14 h-14 shrink-0`}>
+            PFP
           </div>
+          <section className="break-all">
+            <div className={`${textColor} flex items-center gap-x-2`}>
+              <p className="text-md font-bold">{`${display_name}`}</p>
+              <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
+            </div>
+            <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
+            <div className="flex justify-between">
+              <div className="flex gap-x-3 items-center">
+                <FiHeart
+                  className="heart hover:cursor-pointer"
+                  style={{color: `${isLiked ? heartColor : ""}`, fill: `${isLiked ? heartColor : ""}`, backgroundSize : 150}}
+                  onClick={(e) => {e.preventDefault(); e.stopPropagation(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
+                />
+                <p className={`text-gray-400`}>{likeCount}</p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>}
     </>

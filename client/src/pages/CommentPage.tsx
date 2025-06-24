@@ -9,7 +9,6 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
-import { parse } from "@fortawesome/fontawesome-svg-core";
 import { getPost } from "../api/post";
 import Post from "../components/Post";
 
@@ -27,7 +26,7 @@ const CommentPage = () => {
   const [reply, setReply] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const navigator = useNavigate();
-  const { textColor, borderColor } = useThemeStyles();
+  const { textColor, borderColor, bgColor} = useThemeStyles();
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
   const fetchLock = useRef(false);
@@ -207,9 +206,9 @@ const CommentPage = () => {
   }, [thread, mainComment]);
 
   return (
-    <div className="px-4 pt-2">
+    <div className="px-4">
       {/* Navigate Backwards */}
-      {/*<section className='py-3 z-50 sticky w-full top-0 left-0'>
+      <section className='py-3 w-full'>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 
                       rounded-full flex items-center justify-center`}
@@ -217,19 +216,29 @@ const CommentPage = () => {
         >
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
-      </section>*/}
+      </section>
       <div className="pb-2">
-        <div className={`border-1 rounded-2xl ${borderColor}`}>
+        <div className={`border-1 rounded-2xl ${borderColor}`} style={{backgroundColor : bgColor}}>
           {/* Post Content and Reply */}
           <section className={`border-b-1 p-4 ${borderColor}`}>
-            <div className={`flex justify-center flex-col`}>
-              {post && <Post {...post}/>}
-              {thread.filter(c => c.id !== mainComment?.id).map((c) => (
-                <div key={c.id} className="flex">
-                  <Comment {...c} />
-                </div>
-              ))}
-              <div ref={mainCommentRef} className="flex w-full h-full">{mainComment && <Comment {...mainComment}/>}</div>
+            <div className="relative flex">
+              <div className="absolute left-9 top-16 bottom-0 w-px bg-gray-500"/>
+              <div className={`flex justify-center flex-col w-full`}>
+                {post && <div>
+                  <Post {...post}/>
+                </div>}
+                {thread.filter(c => c.id !== mainComment?.id).map((c) => (
+                  <div key={c.id} className="flex">
+                    <Comment {...c} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="relative flex">
+              <div ref={mainCommentRef} className="flex w-full h-full">
+                <div className="absolute left-9 top-0 w-px bg-gray-500" style={{height: 56}}/>
+                {mainComment && <Comment {...mainComment}/>}
+              </div>
             </div>
             {/* Reply Section */}
             <section>
@@ -269,7 +278,7 @@ const CommentPage = () => {
           </section>
           {/* Comments */}
           <div className="h-screen">
-            <section className={`${textColor} ${borderColor} border-b-1 flex flex-col`}>
+            <section className={`${textColor} ${borderColor} flex flex-col p-2`}>
               {comments.map((comment) => (
                 <Comment key={comment.id} {...comment}/>
               ))}

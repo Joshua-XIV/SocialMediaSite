@@ -22,14 +22,14 @@ const PostPage = () => {
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
   const [reply, setReply] = useState("");
-  const {borderColor} = useThemeStyles();
+  const {borderColor, bgColor} = useThemeStyles();
   const [postLoading, setPostLoading] = useState(true);
   const [replyLoading, setReplyLoading] = useState(false);
   const [error, setError] = useState("");
   const { textColor } = useThemeStyles();
   const navigator = useNavigate();
   const { isLoggedIn } = useAuth();
-  const { openLogin } = useModal();  
+  const { openLogin } = useModal();
 
   // Fetch Main Post Content
   useEffect(() => {
@@ -125,18 +125,18 @@ const PostPage = () => {
   }
 
   return (
-    <div className='px-4 pt-2'>
+    <div className='px-4 '>
       {/* Navigate Backwards */}
-      {/*<section className='py-3'>
+      <section className='py-3'>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center`}
           onClick={() => navigator(-1)}
         >
           <FontAwesomeIcon icon={faArrowLeft}/>
         </div>
-      </section>*/}
+      </section>
       <div className='pb-2'>
-        <div className={`border-1 rounded-2xl ${borderColor}`}>
+        <div className={`border-1 rounded-2xl ${borderColor}`} style={{backgroundColor : bgColor}}>
           {/* Post Content and Reply */}
           <section className={`p-4 ${borderColor} border-b-1`}>
             <div className={`flex justify-center`}>
