@@ -38,16 +38,16 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
         className={`border-2 rounded-2xl p-2 ${borderColor} w-full hover:bg-gray-500/20`}
         to={`/post/${id}`}
       >
-        <div className="flex-row items-start space-x-2">
+        <div className="flex flex-row items-start space-x-2">
           <div className={`bg-red-500 flex items-center justify-center ${textColor} border-2 ${borderColor} rounded-full w-14 h-14 shrink-0`}>
             PFP
           </div>
-          <section>
+          <section className="break-all">
             <div className={`${textColor} flex items-center gap-x-2`}>
               <p className="text-md font-bold">{`${display_name}`}</p>
               <p className="text-sm">{`@${username} ${formatTimeShort(created_at)}`}</p>
             </div>
-            <div className={`text-md mt-2 ${postTextColor} break-words`}>{content}</div>
+            <div className={`text-md mt-2 ${postTextColor}`}>{content}</div>
             <div className="flex justify-between">
               <div className="flex gap-x-3 items-center">
                 <FiHeart
