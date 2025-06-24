@@ -185,8 +185,8 @@ export const getCommentThread = async (req, res, next) => {
         JOIN "user" ON "user".id = comment.user_id
         INNER JOIN comment_chain ON comment_chain.parent_id = comment.id
       )
-      SELECT * FROM comment_chain ORDER BY created_at ASC;`
-      , [commentID]);
+      SELECT * FROM comment_chain ORDER BY created_at ASC;
+      `, [commentID]);
 
     const thread = result.rows;
     const root = thread.find(c => c.post_id !== null);
