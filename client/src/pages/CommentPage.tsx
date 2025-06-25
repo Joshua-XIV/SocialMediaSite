@@ -26,7 +26,7 @@ const CommentPage = () => {
   const [reply, setReply] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const navigator = useNavigate();
-  const { textColor, borderColor, bgColor} = useThemeStyles();
+  const { textColor, borderColor, bgColor, backgroundLayer} = useThemeStyles();
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
   const fetchLock = useRef(false);
@@ -197,7 +197,7 @@ const CommentPage = () => {
   useEffect(() => {
     if (mainCommentRef.current) {
       const element = mainCommentRef.current;
-      const yOffset = -48; // 48px is 3rem
+      const yOffset = -110; 
 
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
@@ -208,7 +208,7 @@ const CommentPage = () => {
   return (
     <div className="px-4">
       {/* Navigate Backwards */}
-      <section className='py-3 w-full'>
+      <section className='py-3 w-full' style={{position: "sticky", top: "3rem", zIndex: 50, backgroundColor: backgroundLayer}}>
         <div
           className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 
                       rounded-full flex items-center justify-center`}

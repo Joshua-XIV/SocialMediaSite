@@ -22,7 +22,7 @@ const PostPage = () => {
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
   const [reply, setReply] = useState("");
-  const {borderColor, bgColor} = useThemeStyles();
+  const {borderColor, bgColor, backgroundLayer} = useThemeStyles();
   const [postLoading, setPostLoading] = useState(true);
   const [replyLoading, setReplyLoading] = useState(false);
   const [error, setError] = useState("");
@@ -127,9 +127,10 @@ const PostPage = () => {
   return (
     <div className='px-4 '>
       {/* Navigate Backwards */}
-      <section className='py-3'>
+      <section className='py-3 w-full' style={{position: "sticky", top: "3rem", zIndex: 50, backgroundColor: backgroundLayer}}>
         <div
-          className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center`}
+          className={`${textColor} hover:cursor-pointer bg-transparent hover:bg-gray-700 w-10 h-10 
+                      rounded-full flex items-center justify-center`}
           onClick={() => navigator(-1)}
         >
           <FontAwesomeIcon icon={faArrowLeft}/>
