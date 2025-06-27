@@ -44,9 +44,9 @@ export function MultiSelectPopover<T extends string>({ title, options, selected,
         <p className={`${textColor} font-semibold mb-4 text-lg`}>{title}</p>
         <div className="space-y-2 max-h-[50vh] overflow-y-auto">
           {options.map(option => (
-            <label key={option} className={`${textColor} flex items-center gap-2`}>
+            <label key={option} className={`${textColor} flex items-center gap-2 hover:cursor-pointer w-fit`}>
               <input
-                className="hover:cursor-pointer"
+                className=""
                 type="checkbox"
                 checked={localSelection.has(option)}
                 onChange={() => toggle(option)}
