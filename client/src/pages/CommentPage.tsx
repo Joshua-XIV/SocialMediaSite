@@ -237,6 +237,7 @@ const CommentPage = () => {
             <div className="relative flex">
               <div ref={mainCommentRef} className="flex w-full h-full">
                 <div className="absolute left-9 top-0 w-px bg-gray-500" style={{height: 56}}/>
+                {mainCommentLoading && <p>Loading...</p>}
                 {mainComment && <Comment {...mainComment}/>}
               </div>
             </div>
@@ -271,7 +272,7 @@ const CommentPage = () => {
                     }
                   }}
                 >
-                  SEND
+                  {replyLoading ? <p>...</p> : <p>Send</p>}
                 </button>
               </div>
             </section>
