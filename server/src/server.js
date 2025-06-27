@@ -5,6 +5,7 @@ import posts from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import logger from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
@@ -33,6 +34,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
+app.use('/api/job', jobRoutes)
 
 //Error Handler
 app.use(errorHandler)
