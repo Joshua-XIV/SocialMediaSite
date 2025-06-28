@@ -50,4 +50,9 @@ export interface JobListing {
     min: number;
     max: number;
   };
+  description: string | null;
+  responsibilities: string | null;
+  requirement_summary: string | null;
+  skills: string[] | null;
+  created_at: string;
 }

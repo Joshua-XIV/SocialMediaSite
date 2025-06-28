@@ -9,6 +9,7 @@ type JobFilters = {
   desiredCompensation?: number;
   compensationMin?: number;
   compensationMax?: number;
+  maxAgeInDays?: number;
 };
 
 export async function getFilteredJobs(filters: JobFilters) {
@@ -34,6 +35,9 @@ export async function getFilteredJobs(filters: JobFilters) {
   }
   if (filters.compensationMax !== undefined) {
     params.append("compensationMax", filters.compensationMax.toString());
+  }
+  if (filters.maxAgeInDays !== undefined) {
+    params.append("maxAgeInDays", filters.maxAgeInDays.toString());
   }
 
   const res = await fetch(`${API_URL}/api/job/get-jobs?${params.toString()}`);
