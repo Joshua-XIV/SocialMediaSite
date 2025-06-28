@@ -14,6 +14,7 @@ export const getJobs = async(req, res, next) => {
       desiredCompensation,
       compensationMin,
       compensationMax,
+      maxAgeInDays,
     } = req.query;
 
     let queryText = 'SELECT * FROM jobs';
@@ -53,9 +54,14 @@ export const getJobs = async(req, res, next) => {
 
     if (desiredCompensation) {
       const desired = parseInt(desiredCompensation, 10);
-      // Jobs where max compensation is >= desired salary
       queryParams.push(desired);
-      conditions.push(`compensation_max >= $${queryParams.length}`);
+      conditions.push(`
+        CASE 
+          WHEN compensation_type = 'Hourly' AND commitment = 'Part-time' THEN compensation_max * 1040
+          WHEN compensation_type = 'Hourly' THEN compensation_max * 2080
+          ELSE compensation_max
+        END >= $${queryParams.length}
+      `);
     }
 
     if (compensationMin) {
@@ -66,6 +72,11 @@ export const getJobs = async(req, res, next) => {
     if (compensationMax) {
       queryParams.push(parseInt(compensationMax, 10));
       conditions.push(`compensation_max <= $${queryParams.length}`);
+    }
+
+    if (maxAgeInDays) {
+      queryParams.push(parseInt(maxAgeInDays, 10));
+      conditions.push(`created_at >= NOW() - ($${queryParams.length} * INTERVAL '1 day')`);
     }
 
     if (conditions.length > 0) {

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import type { JobListing, JobCategory, JobType, ExperienceLevel, EducationLevel, CompensationType,} from "../util/types";
+import type { JobListing, JobCategory, JobType, ExperienceLevel, EducationLevel,} from "../util/types";
 import { JOB_TYPES, JOB_CATEGORIES, EXPERIENCE_LEVELS, EDUCATION_LEVELS,} from "../util/types";
 import { MultiSelectPopover } from "../components/MultiSelectPopover";
 import { SalaryFilterPopover } from "../components/SalaryFilterPopover";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { getFilteredJobs } from "../api/job";
+import { formatTimeShort } from "../util/formatTime";
 
 export default function JobPage() {
-  const { textColor, borderColor, bgColor } = useThemeStyles();
+  const { textColor, borderColor, bgColor, backgroundLayer } = useThemeStyles();
 
   const [filters, setFilters] = useState<{
     type: JobType[];
@@ -15,7 +16,6 @@ export default function JobPage() {
     experience: ExperienceLevel[];
     education: EducationLevel[];
     compensation: {
-      type: CompensationType;
       desired: number | null;
     };
   }>({
@@ -23,12 +23,14 @@ export default function JobPage() {
     category: [],
     experience: [],
     education: [],
-    compensation: { type: "Yearly", desired: null },
+    compensation: { desired: null },
   });
 
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [jobList, setJobList] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [maxAgeInDays, setMaxAgeInDays] = useState<number | null>(null);
 
   const isFilterActive = (key: keyof typeof filters) => {
     if (key === "compensation") return filters.compensation.desired !== null;
@@ -38,7 +40,7 @@ export default function JobPage() {
   const clearFilter = (key: keyof typeof filters, value?: string) => {
     setFilters((prev) => {
       if (key === "compensation") {
-        return { ...prev, compensation: { ...prev.compensation, desired: null } };
+        return { ...prev, compensation: { desired: null } };
       }
       const updatedSet = (prev[key] as string[]).filter((item) => item !== value);
       return { ...prev, [key]: updatedSet };
@@ -54,9 +56,8 @@ export default function JobPage() {
           commitment: filters.type,
           experience: filters.experience,
           education: filters.education,
-          compensationType:
-            filters.compensation.desired !== null ? [filters.compensation.type] : undefined,
           desiredCompensation: filters.compensation.desired ?? undefined,
+          maxAgeInDays: maxAgeInDays ?? undefined,
         });
 
         // Transform backend fields to match JobListing type
@@ -73,6 +74,11 @@ export default function JobPage() {
             min: job.compensation_min,
             max: job.compensation_max,
           },
+          description: job.description,
+          responsibilities: job.responsibilities,
+          requirement_summary: job.requirement_summary,
+          skills: job.skills,
+          created_at: job.created_at,
         }));
 
         setJobList(transformed);
@@ -84,7 +90,7 @@ export default function JobPage() {
     };
 
     fetchJobs();
-  }, [filters]);
+  }, [filters, maxAgeInDays]);
 
   const filterConfig = [
     { key: "type", label: "Job Type", options: JOB_TYPES },
@@ -93,59 +99,118 @@ export default function JobPage() {
     { key: "education", label: "Education", options: EDUCATION_LEVELS },
   ] as const;
 
-  return (
-    <div className="p-6">
-      {/* Filter buttons */}
-      <div className="flex flex-wrap gap-3 mb-4">
-        {filterConfig.map((filter) => (
-          <button
-            key={filter.key}
-            className={`px-3 py-1 border rounded hover:cursor-pointer ${
-              isFilterActive(filter.key as keyof typeof filters)
-                ? `border-blue-500 text-blue-500 shadow-blue-500 shadow`
-                : `${borderColor} ${textColor}`
-            } hover:bg-opacity-60`}
-            style={{ backgroundColor: bgColor }}
-            onClick={() =>
-              setOpenFilter(openFilter === filter.key ? null : filter.key)
-            }
-          >
-            {filter.label}
-          </button>
-        ))}
-        <button
-          className={`px-3 py-1 border rounded hover:cursor-pointer ${
-            isFilterActive("compensation")
-              ? "border-blue-500 bg-blue-100 dark:bg-blue-950 text-blue-500"
-              : `${borderColor} ${textColor}`
-          }`}
-          style={{ backgroundColor: bgColor }}
-          onClick={() => setOpenFilter(openFilter === "salary" ? null : "salary")}
-        >
-          Compensation
-        </button>
-      </div>
+  const SORT_OPTIONS = [
+    { label: "Newest", value: "newest" },
+    { label: "Oldest", value: "oldest" },
+    { label: "Least Experience", value: "least_experience" },
+    { label: "Most Experience", value: "most_experience" },
+    { label: "Lowest Salary", value: "lowest_salary" },
+    { label: "Highest Salary", value: "highest_salary" },
+  ];
 
-      {/* Active filter tags */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {(["type", "category", "experience", "education"] as const).map((key) =>
-          filters[key].map((value) => (
-            <span
-              key={`${key}-${value}`}
-              className={`flex items-center gap-1 px-2 py-1 text-sm rounded-full text-blue-500 border-blue-500 shadow shadow-blue-500`}
+  const AGE_FILTER_OPTIONS = [
+    { label: "Past 24 hours", value: 1 },
+    { label: "Past week", value: 7 },
+    { label: "Past month", value: 30 },
+    { label: "Past 3 months", value: 90 },
+    { label: "Past 6 months", value: 180 },
+    { label: "Past year", value: 365 },
+    { label: "All time", value: null },
+  ];
+
+  function getComparableSalary(job: JobListing): number {
+    const { type, min, max } = job.compensation;
+    const average = (min + max) / 2;
+
+    if (type === "Hourly") {
+      const hoursPerYear = job.commitment === "Part-time" ? 1040 : 2080;
+      return average * hoursPerYear;
+    }
+
+    return average;
+  }
+
+  const sortedJobs = [...jobList].sort((a, b) => {
+  switch (sortOption) {
+    case "newest":
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    case "oldest":
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    case "least_experience":
+      return EXPERIENCE_LEVELS.indexOf(a.experience) - EXPERIENCE_LEVELS.indexOf(b.experience);
+    case "most_experience":
+      return EXPERIENCE_LEVELS.indexOf(b.experience) - EXPERIENCE_LEVELS.indexOf(a.experience);
+    case "lowest_salary":
+      return getComparableSalary(a) - getComparableSalary(b);
+    case "highest_salary":
+      return getComparableSalary(b) - getComparableSalary(a);
+    default:
+      return 0;
+  }
+  });
+
+  return (
+    <div className="px-4 pb-4">
+      {/* Filter buttons */}
+      <section className="z-10 sticky top-[3rem] pb-1" style={{backgroundColor : backgroundLayer}}>
+        <div className="flex flex-wrap gap-3 mb-4 pt-4">
+          {filterConfig.map((filter) => (
+            <button
+              key={filter.key}
+              className={`px-3 py-1 border rounded hover:cursor-pointer ${
+                isFilterActive(filter.key as keyof typeof filters)
+                  ? `border-blue-500 text-blue-500 shadow-blue-500 shadow`
+                  : `${borderColor} ${textColor}`
+              } hover:bg-opacity-60`}
               style={{ backgroundColor: bgColor }}
+              onClick={() =>
+                setOpenFilter(openFilter === filter.key ? null : filter.key)
+              }
             >
-              {value}
-              <button
-                onClick={() => clearFilter(key, value)}
-                className="ml-1 text-xs font-bold hover:text-red-500"
+              {filter.label}
+            </button>
+          ))}
+          <button
+            className={`px-3 py-1 border rounded hover:cursor-pointer ${
+              isFilterActive("compensation")
+                ? "border-blue-500 text-blue-500 shadow shadow-blue-500"
+                : `${borderColor} ${textColor}`
+            }`}
+            style={{ backgroundColor: bgColor }}
+            onClick={() => setOpenFilter(openFilter === "salary" ? null : "salary")}
+          >
+            Compensation
+          </button>
+          <button 
+            className={`px-3 py-1 border rounded hover:cursor-pointer font-bold`}
+            style={{ backgroundColor : bgColor }}
+            onClick={() => setFilters({type: [], category: [], experience: [], education: [], compensation: {desired: null}})}
+          >
+            CLEAR FILTERS
+          </button>
+        </div>
+
+          {/* Active filter tags */}
+        <div className="flex flex-wrap gap-2 pb-2">
+          {(["type", "category", "experience", "education"] as const).map((key) =>
+            filters[key].map((value) => (
+              <span
+                key={`${key}-${value}`}
+                className={`flex items-center gap-1 px-2 py-1 text-sm rounded-full text-blue-500 border-blue-500 shadow shadow-blue-500`}
+                style={{ backgroundColor: bgColor }}
               >
-                ✕
-              </button>
-            </span>
-          ))
-        )}
-      </div>
+                {value}
+                <button
+                  onClick={() => clearFilter(key, value)}
+                  className="ml-1 text-xs font-bold hover:text-red-500"
+                >
+                  ✕
+                </button>
+              </span>
+            ))
+          )}
+        </div>
+      </section>
 
       {/* Filter popups */}
       <div className="z-10">
@@ -173,7 +238,7 @@ export default function JobPage() {
             onApply={(newComp) =>
               setFilters((prev) => ({
                 ...prev,
-                compensation: newComp,
+                compensation: { desired: newComp.desired },
               }))
             }
             onClose={() => setOpenFilter(null)}
@@ -181,30 +246,72 @@ export default function JobPage() {
         )}
       </div>
 
+      <div className="flex flex-wrap gap-4 mb-4 items-center pt-1">
+        {/* Sort by dropdown */}
+        <div>
+          <label htmlFor="sortSelect" className={`mr-2 ${textColor} font-semibold`}>
+            Sort by:
+          </label>
+          <select
+            id="sortSelect"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className={`rounded border  px-2 py-1 ${borderColor} ${textColor} cursor-pointer`}
+            style={{backgroundColor : bgColor}}
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value} style={{backgroundColor : bgColor}}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Posted Within dropdown */}
+        <div>
+          <label htmlFor="ageSelect" className={`mr-2 ${textColor} font-semibold`}>
+            Posted Within:
+          </label>
+          <select
+            id="ageSelect"
+            value={maxAgeInDays === null ? "all" : maxAgeInDays.toString()}
+            onChange={(e) =>
+              setMaxAgeInDays(e.target.value === "all" ? null : parseInt(e.target.value, 10))
+            }
+            className={`rounded border px-2 py-1 ${borderColor} ${textColor} cursor-pointer`}
+            style={{backgroundColor : bgColor}}
+          >
+            {AGE_FILTER_OPTIONS.map((opt) => (
+              <option key={opt.label} value={opt.value === null ? "all" : opt.value.toString()} style={{backgroundColor : bgColor}}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>  
+
       {/* Job Listings */}
-      <div className="grid gap-4 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
         {loading ? (
           <p className={textColor}>Loading jobs...</p>
-        ) : jobList.length === 0 ? (
+        ) : sortedJobs.length === 0 ? (
           <p className={textColor}>No jobs match your criteria.</p>
         ) : (
-          jobList.map((job) => (
+          sortedJobs.map((job) => (
             <div
               key={job.id}
-              className={`p-4 rounded border ${borderColor}`}
+              className={`relative p-4 rounded border ${borderColor} cursor-pointer ${textColor}`}
               style={{ backgroundColor: bgColor }}
             >
               <h3 className={`text-xl font-bold ${textColor}`}>{job.title}</h3>
-              <p className={textColor}>
-                {job.commitment} — {job.category} — {job.location}
-              </p>
-              <p className={textColor}>
-                Experience: {job.experience} | Education: {job.education}
-              </p>
+              <p> {job.commitment} — {job.category} - {job.location} </p>
+              <p> Experience: {job.experience} </p>
+              <p>Education: {job.education}</p>
               <p className={textColor}>
                 {job.compensation.type}: ${job.compensation.min.toLocaleString()} - $
                 {job.compensation.max.toLocaleString()}
               </p>
+              <div className="absolute right-0 top-0 p-4">{formatTimeShort(job.created_at)}</div>
             </div>
           ))
         )}
