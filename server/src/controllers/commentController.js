@@ -169,24 +169,64 @@ export const removeLikeComment = async(req, res, next) => {
 
 export const getCommentThread = async (req, res, next) => {
   const commentID = req.params.id;
+  const userID = req.user?.id || null;
   
   try {
     const result = await db.query(`
       WITH RECURSIVE comment_chain AS (
-        SELECT comment.*, "user".username, "user".display_name
-        FROM comment
-        JOIN "user" ON "user".id = comment.user_id
-        WHERE comment.id = $1
+        SELECT 
+          c.id,
+          c.content,
+          c.created_at,
+          c.parent_id,
+          c.post_id,
+          c.user_id,
+          u.username,
+          u.display_name
+        FROM comment c
+        JOIN "user" u ON u.id = c.user_id
+        WHERE c.id = $1 AND c.is_deleted = false
 
         UNION ALL
 
-        SELECT comment.*, "user".username, "user".display_name
-        FROM comment
-        JOIN "user" ON "user".id = comment.user_id
-        INNER JOIN comment_chain ON comment_chain.parent_id = comment.id
+        SELECT 
+          c.id,
+          c.content,
+          c.created_at,
+          c.parent_id,
+          c.post_id,
+          c.user_id,
+          u.username,
+          u.display_name
+        FROM comment c
+        JOIN "user" u ON u.id = c.user_id
+        JOIN comment_chain cc ON cc.parent_id = c.id
+        WHERE c.is_deleted = false
       )
-      SELECT * FROM comment_chain ORDER BY created_at ASC;
-      `, [commentID]);
+      SELECT 
+        cc.id,
+        cc.content,
+        cc.created_at,
+        cc.parent_id,
+        cc.post_id,
+        cc.username,
+        cc.display_name,
+        COUNT(cl_all.user_id) AS total_likes,
+        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+      FROM comment_chain cc
+      LEFT JOIN comment_like cl_all ON cl_all.comment_id = cc.id
+      LEFT JOIN comment_like cl_user ON cl_user.comment_id = cc.id AND cl_user.user_id = $2
+      GROUP BY 
+        cc.id,
+        cc.content,
+        cc.created_at,
+        cc.parent_id,
+        cc.post_id,
+        cc.username,
+        cc.display_name,
+        cl_user.user_id
+      ORDER BY cc.created_at ASC;
+    `, [commentID, userID]);
 
     const thread = result.rows;
     const root = thread.find(c => c.post_id !== null);
@@ -197,6 +237,7 @@ export const getCommentThread = async (req, res, next) => {
     })
   } catch (err) {
     console.error("DB Error: ", err.message);
+    console.error("Stack:", err.stack);
     return next(new HttpError("Failed to fetch comment thread", 500));
   }
 }

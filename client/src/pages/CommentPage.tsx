@@ -160,6 +160,7 @@ const CommentPage = () => {
     }
   }
 
+  // Get comment thread
   useEffect(() => {
     const fetchThread = async () => {
       const parsedId = parseInt(id ?? "");
@@ -180,6 +181,7 @@ const CommentPage = () => {
     if (id) fetchThread();
   }, [id]);
 
+  // Gets main post
   useEffect(() => {
     const fetchPost = async () => {
       if (postID == null) return;
@@ -194,6 +196,7 @@ const CommentPage = () => {
     fetchPost();
   }, [postID]);
 
+  // Should scroll to comment?
   useEffect(() => {
     if (mainCommentRef.current) {
       const element = mainCommentRef.current;
