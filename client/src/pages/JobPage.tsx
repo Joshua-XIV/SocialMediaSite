@@ -6,6 +6,7 @@ import { SalaryFilterPopover } from "../components/SalaryFilterPopover";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { getFilteredJobs } from "../api/job";
 import { formatTimeShort } from "../util/formatTime";
+import JobDetails from "../components/JobDetails";
 
 export default function JobPage() {
   const { textColor, borderColor, bgColor, backgroundLayer } = useThemeStyles();
@@ -31,6 +32,7 @@ export default function JobPage() {
   const [loading, setLoading] = useState(false);
   const [sortOption, setSortOption] = useState("newest");
   const [maxAgeInDays, setMaxAgeInDays] = useState<number | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
 
   const isFilterActive = (key: keyof typeof filters) => {
     if (key === "compensation") return filters.compensation.desired !== null;
@@ -190,7 +192,7 @@ export default function JobPage() {
           </button>
         </div>
 
-          {/* Active filter tags */}
+          {/* Active Filter Buttons */}
         <div className="flex flex-wrap gap-2 pb-2">
           {(["type", "category", "experience", "education"] as const).map((key) =>
             filters[key].map((value) => (
@@ -302,6 +304,7 @@ export default function JobPage() {
               key={job.id}
               className={`relative p-4 rounded border ${borderColor} cursor-pointer ${textColor}`}
               style={{ backgroundColor: bgColor }}
+              onClick={() => setSelectedJob(job)}
             >
               <h3 className={`text-xl font-bold ${textColor}`}>{job.title}</h3>
               <p> {job.commitment} — {job.category} - {job.location} </p>
@@ -316,6 +319,15 @@ export default function JobPage() {
           ))
         )}
       </div>
+      {selectedJob && (
+        <>
+          <div
+            className="fixed inset-0 z-50"
+            onClick={() => setSelectedJob(null)}
+          />
+          <JobDetails job={selectedJob} onClose={() => setSelectedJob(null)} />
+        </>
+      )}
     </div>
   );
 }
