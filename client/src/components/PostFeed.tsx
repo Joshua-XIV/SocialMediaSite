@@ -57,7 +57,7 @@ const PostFeed = () => {
     <div className='flex flex-col px-3 w-full h-[calc(100vh-3rem)]'>
       <div className='flex flex-col p-4 items-center gap-y-3'>
         {posts.map((post) => (
-          <div style={{backgroundColor :bgColor}} className='flex w-full rounded-3xl'>
+          <div key={post.id} style={{backgroundColor :bgColor}} className='flex w-full rounded-3xl'>
             <Post key={post.id} {...post}/>
           </div>
         ))}

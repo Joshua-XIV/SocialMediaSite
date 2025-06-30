@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 
 interface SalaryFilterPopoverProps {
@@ -39,6 +39,7 @@ export const SalaryFilterPopover = ({ selected, onApply, onClose }: SalaryFilter
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           min={0}
+          onKeyDown={(e) => {if (e.key === "Enter") handleApply();}}
         />
         <div className="flex justify-end gap-2 mt-3">
           <button className={`px-2 py-1 rounded ${textColor}`} onClick={onClose}>
