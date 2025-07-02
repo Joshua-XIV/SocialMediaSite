@@ -257,8 +257,19 @@ const CommentPage = () => {
                   e.target.style.height = e.target.scrollHeight + "px";
                 }}
                 style={{overflow : 'hidden'}}
-              >
-              </textarea>
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (reply.length > 0 && reply.length <= 255) {
+                      if (isLoggedIn) {
+                        handleReply();
+                      } else {
+                        openLogin("login");
+                      }
+                    }
+                  }
+                }}
+              />
               <div className={`flex justify-end items-center gap-x-4 pb-1`}>
                 <p className={`${reply.length > 255 ? "text-red-400" : textColor}`}>{reply.length}/255</p>
                 <button

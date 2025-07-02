@@ -155,6 +155,18 @@ const PostPage = () => {
                   e.target.style.height = e.target.scrollHeight + "px";
                 }}
                 style={{overflow : 'hidden'}}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (reply.length > 0 && reply.length <= 255) {
+                      if (isLoggedIn) {
+                        handleReply();
+                      } else {
+                        openLogin("login");
+                      }
+                    }
+                  }
+                }}
               >
               </textarea>
               <div className={`flex justify-end items-center gap-x-4 pb-1`}>
