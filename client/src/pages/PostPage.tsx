@@ -25,7 +25,6 @@ const PostPage = () => {
   const {borderColor, bgColor, backgroundLayer} = useThemeStyles();
   const [postLoading, setPostLoading] = useState(true);
   const [replyLoading, setReplyLoading] = useState(false);
-  const [error, setError] = useState("");
   const { textColor } = useThemeStyles();
   const navigator = useNavigate();
   const { isLoggedIn } = useAuth();
@@ -108,7 +107,6 @@ const PostPage = () => {
 
   // Reply Call
   const handleReply = async() => {
-    setError("");
     setReplyLoading(true);
     const parsedId = parseInt(id ?? "");
     if (isNaN(parsedId)) return;
@@ -141,6 +139,7 @@ const PostPage = () => {
           {/* Post Content and Reply */}
           <section className={`p-4 ${borderColor} border-b-1`}>
             <div className={`flex justify-center`}>
+              {postLoading && <p>Loading Post...</p>}
               {post && <Post {...post}/>}
             </div>
             {/* Reply Section */}
@@ -186,7 +185,7 @@ const PostPage = () => {
                     }
                   }}
                 >
-                  SEND
+                  {replyLoading ? <p>...</p> : <p>Send</p>}D
                 </button>
               </div>
             </section>

@@ -2,7 +2,7 @@ import Comment from "../components/Comment"
 import { useParams, useNavigate } from "react-router-dom"
 import { type PostData, type CommentData } from "../util/types";
 import { useEffect, useState, useRef } from "react";
-import { createComment, getComment, getComments, getCommentThread } from "../api/comment";
+import { createComment, getComments, getCommentThread } from "../api/comment";
 import { toast } from "sonner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -22,7 +22,6 @@ const CommentPage = () => {
   const [isFetchingComments, setIsFetchingComments] = useState(true);
   const commentLoader = useRef(null);
   const MAX_COMMENT_LIMIT = 10;
-  const [error, setError] = useState("");
   const [reply, setReply] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const navigator = useNavigate();
@@ -144,7 +143,6 @@ const CommentPage = () => {
   }, [hasMoreComments, isFetchingComments, commentOffset]);
 
   const handleReply = async() => {
-    setError("");
     setReplyLoading(true);
     const parsedId = parseInt(id ?? "");
     if (isNaN(parsedId)) return;
