@@ -40,7 +40,12 @@ export const getHomePosts = async(req, res, next) => {
         "user".username, 
         "user".display_name,
         COUNT(pl_all.user_id) AS total_likes,
-        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+        (
+          SELECT COUNT(*)
+          FROM comment AS replies
+          WHERE replies.post_id = post.id AND replies.is_deleted = false
+        ) AS total_replies
       FROM post
       JOIN "user" ON "user".id = post.user_id
       LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
@@ -78,7 +83,12 @@ export const getPost = async (req, res, next) => {
           SELECT 1
           FROM post_like pl_user
           WHERE pl_user.post_id = post.id AND pl_user.user_id = $2
-        ) AS liked
+        ) AS liked,
+        (
+          SELECT COUNT(*)
+          FROM comment AS replies
+          WHERE replies.post_id = post.id AND replies.is_deleted = false
+        ) AS total_replies
       FROM post
       JOIN "user" ON "user".id = post.user_id
       WHERE post.id = $1 AND post.is_deleted = false`,

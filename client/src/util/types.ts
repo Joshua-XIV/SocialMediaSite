@@ -7,6 +7,7 @@ export interface PostData {
   display_name: string;
   liked: boolean;
   total_likes: number;
+  total_replies: number;
 }
 
 // id = CommentID
@@ -19,6 +20,7 @@ export interface CommentData {
   display_name: string;
   liked: boolean;
   total_likes: number;
+  total_replies: number;
   parentID: number;
 }
 

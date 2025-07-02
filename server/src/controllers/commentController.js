@@ -53,7 +53,12 @@ export const getComment = async (req, res, next) => {
         "user".username,
         "user".display_name,
         COUNT(cl_all.user_id) AS total_likes,
-        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+        (
+          SELECT COUNT(*) 
+          FROM comment AS replies 
+          WHERE replies.parent_id = c.id AND replies.is_deleted = false
+        ) AS total_replies
       FROM comment c
       JOIN "user" ON "user".id = c.user_id
       LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
@@ -97,9 +102,14 @@ export const getComments = async (req, res, next) => {
       // Fetch replies to a specific comment
       query = `
         SELECT c.id, c.content, c.created_at, c.parent_id,
-               u.username, u.display_name,
-               COUNT(cl_all.user_id) AS total_likes,
-               CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+          u.username, u.display_name,
+          COUNT(cl_all.user_id) AS total_likes,
+          CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+          (
+            SELECT COUNT(*) 
+            FROM comment AS replies 
+            WHERE replies.parent_id = c.id AND replies.is_deleted = false
+          ) AS total_replies               
         FROM comment c
         JOIN "user" u ON u.id = c.user_id
         LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
@@ -114,9 +124,14 @@ export const getComments = async (req, res, next) => {
       // Fetch top-level comments on a post
       query = `
         SELECT c.id, c.content, c.created_at, c.parent_id,
-               u.username, u.display_name,
-               COUNT(cl_all.user_id) AS total_likes,
-               CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+          u.username, u.display_name,
+          COUNT(cl_all.user_id) AS total_likes,
+          CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+          (
+            SELECT COUNT(*) 
+            FROM comment AS replies 
+            WHERE replies.parent_id = c.id AND replies.is_deleted = false
+          ) AS total_replies   
         FROM comment c
         JOIN "user" u ON u.id = c.user_id
         LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
@@ -212,7 +227,12 @@ export const getCommentThread = async (req, res, next) => {
         cc.username,
         cc.display_name,
         COUNT(cl_all.user_id) AS total_likes,
-        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked
+        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+        (
+          SELECT COUNT(*) 
+          FROM comment AS replies 
+          WHERE replies.parent_id = cc.id AND replies.is_deleted = false
+        ) AS total_replies
       FROM comment_chain cc
       LEFT JOIN comment_like cl_all ON cl_all.comment_id = cc.id
       LEFT JOIN comment_like cl_user ON cl_user.comment_id = cc.id AND cl_user.user_id = $2
