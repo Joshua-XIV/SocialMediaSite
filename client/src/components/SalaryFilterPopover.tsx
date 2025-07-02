@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 
 interface SalaryFilterPopoverProps {
