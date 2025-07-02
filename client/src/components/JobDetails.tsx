@@ -31,12 +31,17 @@ const JobDetails = ({ job, onClose }: JobDetailsProps) => {
         {/* Header */}
         <div className={`flex justify-between items-center p-4 border-b ${borderColor}`}>
           <h2 className={`${textColor} text-lg font-semibold`}>Job Details</h2>
-          <button
-            onClick={handleClose}
-            className="text-red-500 font-bold text-xl hover:opacity-70 cursor-pointer"
-          >
-            ✕
-          </button>
+          <div className="space-x-6">
+            <a href="https://google.com" target="_blank" rel="noopener noreferrer" className={`${borderColor} border-2 bg-blue-400 rounded-2xl px-2 py-1`}>
+              Apply
+            </a>
+            <button
+              onClick={handleClose}
+              className="text-red-500 font-bold text-xl hover:opacity-70 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
         </div>
         {/* Content */}
         <div className={`${textColor} p-4 overflow-y-auto h-[calc(100%-3rem)]`}>
