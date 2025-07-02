@@ -8,10 +8,11 @@ import { Link, useLocation } from "react-router-dom";
 import type { CommentData } from "../util/types";
 import { likeComment, removeLikeComment } from "../api/comment";
 
-const Comment = ({id, username, content, created_at, display_name, liked, total_likes} : CommentData) => {
+const Comment = ({id, username, content, created_at, display_name, liked, total_likes, total_replies} : CommentData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes || 0);
+  const replyCount = total_replies ?? 0;
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
   const location = useLocation();
@@ -55,6 +56,7 @@ const Comment = ({id, username, content, created_at, display_name, liked, total_
                     onClick={(e) => {e.preventDefault(); e.stopPropagation(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
                   />
                     <p className={`text-gray-400`}>{likeCount}</p>
+                    <p className={`text-gray-400`}>Replies: {replyCount}</p>
                 </div>
               </div>
             </section>
@@ -84,6 +86,7 @@ const Comment = ({id, username, content, created_at, display_name, liked, total_
                   onClick={() => {`${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
                 />
                 <p className={`text-gray-400`}>{likeCount}</p>
+                <p className={`text-gray-400`}>Replies: {replyCount}</p>
               </div>
             </div>
           </section>

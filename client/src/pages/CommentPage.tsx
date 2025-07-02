@@ -37,7 +37,7 @@ const CommentPage = () => {
   
 
   // Fetch Main Comment
-  useEffect(() => {
+  /*useEffect(() => {
     const fetchMainComment = async () => {
       const parsedId = parseInt(id ?? "");
       if (isNaN(parsedId)) return;
@@ -53,7 +53,7 @@ const CommentPage = () => {
     }
 
     if (id) fetchMainComment();
-  }, [id]);
+  }, [id]);*/
 
   // Grabs Comments when needed
   useEffect(() => {
@@ -167,6 +167,7 @@ const CommentPage = () => {
       if (isNaN(parsedId)) return;
       try {
         const data = await getCommentThread(parsedId);
+        console.log("Thread: ", data.thread);
         setThread(data.thread);
         setPostID(data.post_id)
         setMainComment(data.thread[data.thread.length - 1]);

@@ -9,10 +9,11 @@ import { Link, useLocation } from "react-router-dom";
 import type { PostData } from "../util/types";
 import { useNavigate } from "react-router-dom";
 
-const Post = ({ username, content, created_at, display_name, id, liked, total_likes }: PostData) => {
+const Post = ({ username, content, created_at, display_name, id, liked, total_likes, total_replies}: PostData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
   const [likeCount, setLikeCount] = useState(total_likes);
+  const replyCount = total_replies ?? 0;
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
   const location = useLocation();
@@ -56,6 +57,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
                   onClick={(e) => {e.preventDefault(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
                 />
                   <p className={`text-gray-400`}>{likeCount}</p>
+                  <p className={`text-gray-400`}>Replies: {replyCount}</p>
               </div>
             </div>
           </section>
@@ -85,6 +87,7 @@ const Post = ({ username, content, created_at, display_name, id, liked, total_li
                   onClick={(e) => {e.preventDefault(); e.stopPropagation(); `${isLoggedIn ? handleToggleLike() : openLogin("login")}`}}
                 />
                 <p className={`text-gray-400`}>{likeCount}</p>
+                <p className={`text-gray-400`}>Replies: {replyCount}</p>
               </div>
             </div>
           </section>
