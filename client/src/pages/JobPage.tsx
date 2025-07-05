@@ -184,7 +184,7 @@ export default function JobPage() {
             Compensation
           </button>
           <button 
-            className={`px-3 py-1 border rounded hover:cursor-pointer font-bold`}
+            className={`px-3 py-1 border rounded hover:cursor-pointer font-bold ${textColor} ${borderColor}`}
             style={{ backgroundColor : bgColor }}
             onClick={() => setFilters({type: [], category: [], experience: [], education: [], compensation: {desired: null}})}
           >
