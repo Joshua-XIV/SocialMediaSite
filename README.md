@@ -47,7 +47,7 @@ Features are being added incrementally with a focus on clean architecture, modul
   Different permission levels for users, moderators, and admins
 
 - **Full-text Search**  
-  Post discovery using PostgreSQL or ElasticSearch
+  Post discovery using PostgreSQL
 
 ---
 
