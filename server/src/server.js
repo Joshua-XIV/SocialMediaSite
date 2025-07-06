@@ -15,7 +15,7 @@ const port = process.env.PORT || 8001;
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.IP,
   credentials: true
 }));
 
@@ -37,4 +37,4 @@ app.use('/api/jobs', jobRoutes)
 //Error Handler
 app.use(errorHandler)
 
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+app.listen(port, () => console.log(`Server is RUNNING ${port}`));
