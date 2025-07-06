@@ -28,7 +28,6 @@ app.use(cookieParser());
 app.use(logger);
 
 // Routes
-app.use('/api', posts);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/posts', postRoutes);
