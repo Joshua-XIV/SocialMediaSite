@@ -2,7 +2,7 @@ const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export async function createComment(postID : number | null, content : string, parentID : number | null) {
   if (!content.trim()) throw new Error("Comment cannot be empty");
-  const res = await fetch(`${API_URL}/api/comment/create-comment`, {
+  const res = await fetch(`${API_URL}/api/comments/`, {
     method: "POST",
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
@@ -18,7 +18,7 @@ export async function createComment(postID : number | null, content : string, pa
 }
 
 export async function getComment(commentID: number) {
-  const res = await fetch(`${API_URL}/api/comment/${commentID}`, {
+  const res = await fetch(`${API_URL}/api/comments/${commentID}`, {
     credentials: "include",
   });
 
@@ -50,7 +50,7 @@ export async function getComments(
   if (limit) params.append("limit", limit.toString());
   if (offset) params.append("offset", offset.toString());
 
-  const res = await fetch(`${API_URL}/api/comment/get-comments?${params.toString()}`, {
+  const res = await fetch(`${API_URL}/api/comments/?${params.toString()}`, {
     credentials: "include",
   });
 
@@ -63,7 +63,7 @@ export async function getComments(
 }
 
 export async function likeComment (commentID: string | number) {
-  const res = await fetch(`${API_URL}/api/comment/${commentID}/like`, {
+  const res = await fetch(`${API_URL}/api/comments/${commentID}/like`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",    
@@ -78,7 +78,7 @@ export async function likeComment (commentID: string | number) {
 }
 
 export async function removeLikeComment (commentID: string | number) {
-  const res = await fetch(`${API_URL}/api/comment/${commentID}/unlike`, {
+  const res = await fetch(`${API_URL}/api/comments/${commentID}/unlike`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",    
@@ -93,7 +93,7 @@ export async function removeLikeComment (commentID: string | number) {
 }
 
 export async function getCommentThread (commentID: string | number) {
-  const res = await fetch(`${API_URL}/api/comment/${commentID}/comment-thread`, {
+  const res = await fetch(`${API_URL}/api/comments/${commentID}/thread`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
     credentials: "include",

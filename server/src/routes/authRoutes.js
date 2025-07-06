@@ -4,12 +4,12 @@ import { authenticate } from '../middleware/authenticate.js';
 
 const router = express.Router();
 
-router.post('/login-account', loginUser);
-router.post('/create-account', createUser);
-router.post('/logout-account', logoutUser);
-router.post('/refresh-token', refreshTokenHandler);
+router.post('/login', loginUser);
+router.post('/register', createUser);
+router.post('/logout', logoutUser);
+router.post('/refresh', refreshTokenHandler);
 // Get Auth State
-router.get('/check-auth', authenticate , async(req, res) => {
+router.get('/check', authenticate , async(req, res) => {
   res.sendStatus(200);
 });
 

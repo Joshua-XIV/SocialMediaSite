@@ -1,7 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import posts from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
@@ -32,9 +31,9 @@ app.use(logger);
 app.use('/api', posts);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/post', postRoutes);
-app.use('/api/comment', commentRoutes);
-app.use('/api/job', jobRoutes)
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/jobs', jobRoutes)
 
 //Error Handler
 app.use(errorHandler)

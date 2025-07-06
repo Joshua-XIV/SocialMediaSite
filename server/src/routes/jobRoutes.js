@@ -4,6 +4,6 @@ import { getJobs } from '../controllers/jobController.js';
 
 const router = express.Router();
 
-router.get('/get-jobs', getJobs);
+router.get('/', getJobs);
 
 export default router;

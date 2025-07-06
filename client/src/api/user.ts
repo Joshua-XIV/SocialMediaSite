@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export async function getUserInfo() {
-  const res = await fetch(`${API_URL}/api/user/user-info`, {
+  const res = await fetch(`${API_URL}/api/user/me`, {
     method: "GET",
     headers: { "Content-Type" : "application/json" },
     credentials: "include",

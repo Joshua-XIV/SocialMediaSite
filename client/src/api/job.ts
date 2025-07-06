@@ -40,7 +40,7 @@ export async function getFilteredJobs(filters: JobFilters) {
     params.append("maxAgeInDays", filters.maxAgeInDays.toString());
   }
 
-  const res = await fetch(`${API_URL}/api/job/get-jobs?${params.toString()}`);
+  const res = await fetch(`${API_URL}/api/jobs/?${params.toString()}`);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch jobs: ${res.statusText}`);

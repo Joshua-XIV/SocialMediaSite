@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export async function createPost(content: string) {
-  const res = await fetch(`${API_URL}/api/post/create-post`, {
+  const res = await fetch(`${API_URL}/api/posts/`, {
     method: 'POST',
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
@@ -18,7 +18,7 @@ export async function createPost(content: string) {
 
 export async function getHomePosts(limit: number, offset: number) {
   const cappedLimit = Math.min(limit, 10);
-  const res = await fetch(`${API_URL}/api/post/get-home-posts?limit=${cappedLimit}&offset=${offset}`, {
+  const res = await fetch(`${API_URL}/api/posts/?limit=${cappedLimit}&offset=${offset}`, {
     method: 'GET',
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
@@ -33,7 +33,7 @@ export async function getHomePosts(limit: number, offset: number) {
 }
 
 export async function getPost(id: number) {
-  const res = await fetch(`${API_URL}/api/post/get-post/${id}`, {
+  const res = await fetch(`${API_URL}/api/posts/${id}`, {
     method: 'GET',
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
@@ -48,7 +48,7 @@ export async function getPost(id: number) {
 }
 
 export async function likePost(postID: string | number) {
-  const res = await fetch(`${API_URL}/api/post/${postID}/like`, {
+  const res = await fetch(`${API_URL}/api/posts/${postID}/like`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -64,7 +64,7 @@ export async function likePost(postID: string | number) {
 
 
 export async function removeLikePost(postID: string | number) {
-  const res = await fetch(`${API_URL}/api/post/${postID}/unlike`, {
+  const res = await fetch(`${API_URL}/api/posts/${postID}/unlike`, {
     method: 'PATCH',
     headers: { "Content-Type": "application/json" },
     credentials: "include",

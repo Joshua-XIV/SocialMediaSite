@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export async function login(emailOrUsername: string, password: string) {
-  const res = await fetch(`${API_URL}/api/auth/login-account`, {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
@@ -16,7 +16,7 @@ export async function login(emailOrUsername: string, password: string) {
 }
 
 export async function logout() {
-  const res = await fetch(`${API_URL}/api/auth/logout-account`, {
+  const res = await fetch(`${API_URL}/api/auth/logout`, {
     method: "POST",
     headers: { "Content-Type" : "application/json"},
     credentials: "include",
@@ -29,7 +29,7 @@ export async function logout() {
 }
 
 export async function signUp(username: string, display_name: string, email: string, password: string) {
-  const res = await fetch(`${API_URL}/api/auth/create-account`, {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
     method: 'POST',
     headers: { "Content-Type" : "application/json" },
     credentials: "include",
