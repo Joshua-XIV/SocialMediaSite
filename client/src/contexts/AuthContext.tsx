@@ -22,7 +22,7 @@ export const AuthProvider = ({ children } : { children : ReactNode}) => {
   const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/auth/check-auth`, { credentials: 'include' })
+    fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/auth/check`, { credentials: 'include' })
       .then(res => {
         const ok = res.status === 200;
         setIsLoggedIn(ok);
