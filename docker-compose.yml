@@ -1,16 +1,12 @@
 services:
   frontend:
-    build: 
+    build:
       context: ./client
       dockerfile: Dockerfile
+    container_name: socialmediasite-frontend
     ports:
-      - "5173:5173"
-      - "24678:24678"
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - "80:80"
+    restart: always
 
   backend:
     build:
