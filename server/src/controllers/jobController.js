@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import {pool as db} from '../database.js'
 import HttpError from '../utils/errorUtils.js'
 
@@ -76,7 +77,7 @@ export const getJobs = async(req, res, next) => {
 
     if (maxAgeInDays) {
       queryParams.push(parseInt(maxAgeInDays, 10));
-      conditions.push(`created_at >= NOW() - ($${queryParams.length} * INTERVAL '1 day')`);
+      conditions.push(`created_at >= NOW() - ($${queryParams.length} * INTERVAL '1 day')`)
     }
 
     if (conditions.length > 0) {
@@ -84,8 +85,51 @@ export const getJobs = async(req, res, next) => {
     }
 
     const { rows } = await db.query(queryText, queryParams);
-    res.json(rows);
+    res.json(rows)
   } catch (err) {
     next(new HttpError(500, `Failed to get jobs: ${err}`))
+  }
+}
+
+export const createJob = async(req, res, next) => {
+  try {
+    const {
+      title,
+      category,
+      location,
+      commitment,
+      experience,
+      compensation_type,
+      compensation_min,
+      compensation_max,
+      description,
+      responsibilities,
+      requirement_summary,
+      skills,
+      education,
+    } = req.body
+
+    if (!title | !category | !location | !commitment | !experience | !compensation_type 
+      | !compensation_min | !compensation_max | !description | !responsibilities | !requirement_summary | !skills | !education) {
+        return next(new HttpError(400, `Missing required job fields`));
+    }
+
+    const query = 
+      `INSERT INTO jobs (
+        title, category, location, commitment, experience, compensation_type, compensation_min, compensation_max,
+        description, responsibilities, requirement_summary, skills, education, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()
+      ) RETURNING *;
+    `;
+
+    const values = [title, category, location, commitment, experience, compensation_type, compensation_min, 
+      compensation_max, description, responsibilities, requirement_summary, skills, education
+    ];
+
+    const { rows } = await db.query(query, values);
+    return res.status(201).json(rows[0]);
+  } catch (err) {
+    next(new HttpError(500, `Failed to post job: ${err}`));
   }
 }
