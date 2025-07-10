@@ -48,3 +48,36 @@ export async function getFilteredJobs(filters: JobFilters) {
 
   return await res.json();
 }
+
+type CreateJobData = {
+  title: string;
+  category: string;
+  location: string;
+  commitment: string;
+  experience: string;
+  compensation_type: string;
+  compensation_min: number;
+  compensation_max: number;
+  description: string;
+  responsibilities: string;
+  requirement_summary: string;
+  skills: string[];
+  education: string;
+};
+
+export async function createJob(jobData: CreateJobData) {
+  const res = await fetch(`${API_URL}/api/jobs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(jobData),
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to create job: ${res.statusText}`);
+  }
+
+  return await res.json();
+}

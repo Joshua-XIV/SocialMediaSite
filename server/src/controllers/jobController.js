@@ -1,4 +1,3 @@
-import { lazy } from 'react';
 import {pool as db} from '../database.js'
 import HttpError from '../utils/errorUtils.js'
 
@@ -91,7 +90,7 @@ export const getJobs = async(req, res, next) => {
   }
 }
 
-export const createJob = async(req, res, next) => {
+export const createJob = async (req, res, next) => {
   try {
     const {
       title,
@@ -107,24 +106,55 @@ export const createJob = async(req, res, next) => {
       requirement_summary,
       skills,
       education,
-    } = req.body
+    } = req.body;
 
-    if (!title | !category | !location | !commitment | !experience | !compensation_type 
-      | !compensation_min | !compensation_max | !description | !responsibilities | !requirement_summary | !skills | !education) {
-        return next(new HttpError(400, `Missing required job fields`));
+    const userID = req.user?.id;
+    if (!userID) {
+      return next(new HttpError(400, "Missing user"));
     }
 
-    const query = 
-      `INSERT INTO jobs (
-        title, category, location, commitment, experience, compensation_type, compensation_min, compensation_max,
-        description, responsibilities, requirement_summary, skills, education, created_at
+    const requiredFields = [
+      "title", "category", "location", "commitment", "experience",
+      "compensation_type", "description", "responsibilities",
+      "requirement_summary", "skills", "education"
+    ];
+
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return next(new HttpError(400, `Missing required field: ${field}`));
+      }
+    }
+
+    if (typeof compensation_min !== "number" || typeof compensation_max !== "number") {
+      return next(new HttpError(400, "Compensation must be numbers"));
+    }
+
+    const limits = [
+      { field: "description", max: 3000 },
+      { field: "responsibilities", max: 2000 },
+      { field: "requirement_summary", max: 1000 },
+    ];
+
+    for (const { field, max } of limits) {
+      if (req.body[field].length > max) {
+        return next(new HttpError(400, `${field} too long (max ${max} characters)`));
+      }
+    }
+
+    const query = `
+      INSERT INTO jobs (
+        title, category, location, commitment, experience, compensation_type, 
+        compensation_min, compensation_max, description, responsibilities, 
+        requirement_summary, skills, education, created_at, user_id
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), $14
       ) RETURNING *;
     `;
 
-    const values = [title, category, location, commitment, experience, compensation_type, compensation_min, 
-      compensation_max, description, responsibilities, requirement_summary, skills, education
+    const values = [
+      title, category, location, commitment, experience, compensation_type,
+      compensation_min, compensation_max, description, responsibilities,
+      requirement_summary, skills, education, userID
     ];
 
     const { rows } = await db.query(query, values);
@@ -132,4 +162,4 @@ export const createJob = async(req, res, next) => {
   } catch (err) {
     next(new HttpError(500, `Failed to post job: ${err}`));
   }
-}
+};
