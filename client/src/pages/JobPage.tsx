@@ -7,9 +7,13 @@ import { useThemeStyles } from "../hooks/useThemeStyles";
 import { getFilteredJobs } from "../api/job";
 import { formatTimeShort } from "../util/formatTime";
 import JobDetails from "../components/JobDetails";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function JobPage() {
   const { textColor, borderColor, bgColor, backgroundLayer } = useThemeStyles();
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   const [filters, setFilters] = useState<{
     type: JobType[];
@@ -190,6 +194,13 @@ export default function JobPage() {
           >
             CLEAR FILTERS
           </button>
+          {isLoggedIn && <button
+            className={`px-3 py-1 border rounded hover:cursor-pointer font-bold ${textColor} ${borderColor}`}
+            style={{ backgroundColor : bgColor }}
+            onClick={() => navigate("/jobs/create")}
+          >
+            Create Job
+          </button>}
         </div>
 
           {/* Active Filter Buttons */}
@@ -212,6 +223,7 @@ export default function JobPage() {
             ))
           )}
         </div>
+        <p className="text-center text-yellow-500"> These job links are for demo purposes only and do not lead to real applications. </p>
       </section>
 
       {/* Filter popups */}
