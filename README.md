@@ -6,7 +6,7 @@ A **work-in-progress** full-stack social media application designed to explore m
 
 ## 🌐 Live Demo
 
-Coming soon...
+[https://social-connecting.com](https://social-connecting.com)
 
 ---
 
