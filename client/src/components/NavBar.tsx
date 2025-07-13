@@ -12,6 +12,7 @@ import SideBarIcon from "../assets/sidebar.svg?react"
 import CreatePostWindow from './CreatePostWindow';
 import { Link } from 'react-router-dom';
 import { useModal } from '../contexts/ModalContext';
+import Avatar from './Avatar';
 
 // Starting to become Div & Effect Soup, need to just refactor and put some stuff into components
 interface NavBarProps {
@@ -20,7 +21,7 @@ interface NavBarProps {
 }
 const NavBar = ({isMobile, openSideBar} : NavBarProps) => {
   const { theme } = useTheme();
-  const { isLoggedIn, displayName } = useAuth();
+  const { isLoggedIn, displayName, avatarColor } = useAuth();
   const { bgColor, bgAntiColor, textColor, borderColor } = useThemeStyles();
   const [openCog, setOpenCog] = useState(false);
   const [renderCog, setRenderCog] = useState(false);
@@ -118,6 +119,7 @@ const NavBar = ({isMobile, openSideBar} : NavBarProps) => {
               />
             </div>}
           {isLoggedIn && <div>{displayName}</div>}
+          {isLoggedIn && <Avatar displayName={displayName || ''} avatarColor={avatarColor || '#3B82F6'} size='sm'/>}
           {/* Cog Wheel & Cog Window */}
           <div className="relative" ref={cogRef}>
             <FontAwesomeIcon
