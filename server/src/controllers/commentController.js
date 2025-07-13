@@ -52,6 +52,7 @@ export const getComment = async (req, res, next) => {
         c.parent_id,
         "user".username,
         "user".display_name,
+        "user".avatar_color,
         COUNT(cl_all.user_id) AS total_likes,
         CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
         (
@@ -64,7 +65,7 @@ export const getComment = async (req, res, next) => {
       LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
       LEFT JOIN comment_like cl_user ON cl_user.comment_id = c.id AND cl_user.user_id = $2
       WHERE c.id = $1 AND c.is_deleted = false
-      GROUP BY c.id, "user".username, "user".display_name, cl_user.user_id`,
+      GROUP BY c.id, "user".username, "user".display_name, "user".avatar_color, cl_user.user_id`,
       [commentID, userID]
     );
 
@@ -102,7 +103,7 @@ export const getComments = async (req, res, next) => {
       // Fetch replies to a specific comment
       query = `
         SELECT c.id, c.content, c.created_at, c.parent_id,
-          u.username, u.display_name,
+          u.username, u.display_name, u.avatar_color,
           COUNT(cl_all.user_id) AS total_likes,
           CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
           (
@@ -115,7 +116,7 @@ export const getComments = async (req, res, next) => {
         LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
         LEFT JOIN comment_like cl_user ON cl_user.comment_id = c.id AND cl_user.user_id = $2
         WHERE c.parent_id = $1 AND c.is_deleted = false
-        GROUP BY c.id, u.username, u.display_name, cl_user.user_id
+        GROUP BY c.id, u.username, u.display_name, u.avatar_color, cl_user.user_id
         ORDER BY c.created_at ASC
         LIMIT $3 OFFSET $4
       `;
@@ -124,7 +125,7 @@ export const getComments = async (req, res, next) => {
       // Fetch top-level comments on a post
       query = `
         SELECT c.id, c.content, c.created_at, c.parent_id,
-          u.username, u.display_name,
+          u.username, u.display_name, u.avatar_color,
           COUNT(cl_all.user_id) AS total_likes,
           CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
           (
@@ -137,7 +138,7 @@ export const getComments = async (req, res, next) => {
         LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
         LEFT JOIN comment_like cl_user ON cl_user.comment_id = c.id AND cl_user.user_id = $2
         WHERE c.post_id = $1 AND c.parent_id IS NULL AND c.is_deleted = false
-        GROUP BY c.id, u.username, u.display_name, cl_user.user_id
+        GROUP BY c.id, u.username, u.display_name, u.avatar_color, cl_user.user_id
         ORDER BY c.created_at ASC
         LIMIT $3 OFFSET $4
       `;
@@ -197,7 +198,8 @@ export const getCommentThread = async (req, res, next) => {
           c.post_id,
           c.user_id,
           u.username,
-          u.display_name
+          u.display_name,
+          u.avatar_color
         FROM comment c
         JOIN "user" u ON u.id = c.user_id
         WHERE c.id = $1 AND c.is_deleted = false
@@ -212,7 +214,8 @@ export const getCommentThread = async (req, res, next) => {
           c.post_id,
           c.user_id,
           u.username,
-          u.display_name
+          u.display_name,
+          u.avatar_color
         FROM comment c
         JOIN "user" u ON u.id = c.user_id
         JOIN comment_chain cc ON cc.parent_id = c.id
@@ -226,6 +229,7 @@ export const getCommentThread = async (req, res, next) => {
         cc.post_id,
         cc.username,
         cc.display_name,
+        cc.avatar_color,
         COUNT(cl_all.user_id) AS total_likes,
         CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
         (
@@ -244,6 +248,7 @@ export const getCommentThread = async (req, res, next) => {
         cc.post_id,
         cc.username,
         cc.display_name,
+        cc.avatar_color,
         cl_user.user_id
       ORDER BY cc.created_at ASC;
     `, [commentID, userID]);
