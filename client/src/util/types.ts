@@ -5,6 +5,7 @@ export interface PostData {
   content: string;
   created_at: string;
   display_name: string;
+  avatar_color: string;
   liked: boolean;
   total_likes: number;
   total_replies: number;
