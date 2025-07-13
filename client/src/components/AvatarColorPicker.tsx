@@ -14,10 +14,9 @@ const AvatarColorPicker: React.FC<AvatarColorPickerProps> = ({
   onColorChange,
   className = "",
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState(currentColor);
   const { setAvatarColor } = useAuth();
-  const { bgColor, borderColor } = useThemeStyles();
+  const { bgColor } = useThemeStyles();
 
   const avatarColors = [
     { name: "Blue", value: "#3B82F6" },
@@ -38,7 +37,6 @@ const AvatarColorPicker: React.FC<AvatarColorPickerProps> = ({
       setSelectedColor(color);
       setAvatarColor(color);
       onColorChange?.(color);
-      setIsOpen(false);
     } catch (error) {
       console.error("Failed to update avatar color:", error);
     }

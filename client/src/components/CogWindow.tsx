@@ -5,8 +5,6 @@ import { logout } from "../api/auth";
 import CogButton from "./CogButton";
 import SunImage from "../assets/sun.svg";
 import MoonImage from "../assets/moon.svg";
-import AvatarColorPicker from "./AvatarColorPicker";
-import AvatarColorWheel from "./AvatarColorWheel";
 import AvatarUnifiedPickerWheel from "./AvatarUnifiedPickerWheel";
 import { updateAvatarColor } from "../api/user";
 

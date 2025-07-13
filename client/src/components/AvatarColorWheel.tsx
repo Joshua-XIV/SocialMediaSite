@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { updateAvatarColor } from '../api/user';
-import { useAuth } from '../contexts/AuthContext';
 import { useThemeStyles } from '../hooks/useThemeStyles';
 
 interface AvatarColorWheelProps {
@@ -17,7 +15,6 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
   const [selectedColor, setSelectedColor] = useState(currentColor);
   const [hue, setHue] = useState(0);
   const [saturation, setSaturation] = useState(100);
-  const { setAvatarColor } = useAuth();
   const { bgColor, borderColor, textColor } = useThemeStyles();
   const wheelRef = useRef<HTMLCanvasElement>(null);
 
@@ -128,7 +125,7 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
 
   useEffect(() => {
     if (currentColor) {
-      const [h, s, l] = hexToHsl(currentColor);
+      const [h, s] = hexToHsl(currentColor);
       setHue(h);
       setSaturation(s);
     }
