@@ -6,6 +6,9 @@ import CogButton from "./CogButton";
 import SunImage from "../assets/sun.svg";
 import MoonImage from "../assets/moon.svg";
 import AvatarColorPicker from "./AvatarColorPicker";
+import AvatarColorWheel from "./AvatarColorWheel";
+import AvatarUnifiedPickerWheel from "./AvatarUnifiedPickerWheel";
+import { updateAvatarColor } from "../api/user";
 
 interface CogWindowProps {
   openLogin: () => void;
@@ -21,6 +24,7 @@ const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
     setUsername,
     setDisplayName,
     avatarColor,
+    setAvatarColor
   } = useAuth();
 
   const toggleTheme = () => {
@@ -36,6 +40,17 @@ const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
     setDisplayName("");
     window.location.reload();
   };
+
+  const handleColorChange = async (newColor: string) => {
+    if (isLoggedIn) {
+      try {
+        await updateAvatarColor(newColor);
+        setAvatarColor(newColor);
+      } catch (error) {
+        console.error('Failed to update avatar color:', error);
+      }
+    }
+  };  
 
   return (
     <div
@@ -53,10 +68,12 @@ const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
       )}
       {isLoggedIn && <CogButton onClick={() => ""} text="View Profile" />}
       {isLoggedIn && (
-        <AvatarColorPicker
-          currentColor={avatarColor || "#3B82F6"}
-          className="mb-2"
-        />
+        <div>
+          <AvatarUnifiedPickerWheel
+            currentColor={avatarColor || '#3B82F6'}
+            onColorChange={handleColorChange}
+          />
+        </div>
       )}
       <CogButton onClick={handleSettings} text="Settings" />
       {isLoggedIn && <CogButton onClick={handleLogout} text="Logout" />}
