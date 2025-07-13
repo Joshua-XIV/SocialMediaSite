@@ -39,6 +39,7 @@ export const getHomePosts = async(req, res, next) => {
         post.created_at, 
         "user".username, 
         "user".display_name,
+        "user".avatar_color,
         COUNT(pl_all.user_id) AS total_likes,
         CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
         (
@@ -51,7 +52,7 @@ export const getHomePosts = async(req, res, next) => {
       LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
       LEFT JOIN post_like pl_user ON pl_user.post_id = post.id AND pl_user.user_id = $3
       WHERE post.is_deleted = false
-      GROUP BY post.id, "user".username, "user".display_name, pl_user.user_id
+      GROUP BY post.id, "user".username, "user".display_name, "user".avatar_color, pl_user.user_id
       ORDER BY post.created_at DESC
       LIMIT $1 OFFSET $2`,
       [limit, offset, userID]
@@ -74,6 +75,7 @@ export const getPost = async (req, res, next) => {
         post.created_at,
         "user".username,
         "user".display_name,
+        "user".avatar_color,
         COALESCE((
           SELECT COUNT(*)
           FROM post_like pl_all

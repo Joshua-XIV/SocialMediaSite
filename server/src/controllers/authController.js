@@ -6,6 +6,15 @@ import bcrypt from 'bcrypt';
 
 const saltRounds = 10;
 
+// Avatar colors array
+// Blue, Red, Green. Orange, Purple
+const AVATAR_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6'];
+
+// Function to get random avatar color
+const getRandomAvatarColor = () => {
+  return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+};
+
 export const createUser = async(req, res, next) => {
   if (!req.body) {
     return next(new HttpError('Request body is missing', 400));
@@ -32,9 +41,10 @@ export const createUser = async(req, res, next) => {
   // Insert user into db
   try {
     const password_hash = await bcrypt.hash(password, saltRounds);
+    const avatar_color = getRandomAvatarColor();
 
-    const newUserAccount = await db.query(`INSERT INTO "user" (username, display_name, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [username.toLowerCase(), display_name, email, password_hash]
+    const newUserAccount = await db.query(`INSERT INTO "user" (username, display_name, email, password_hash, avatar_color) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [username.toLowerCase(), display_name, email, password_hash, avatar_color]
     );
 
     const newUser = newUserAccount.rows[0];
@@ -42,7 +52,8 @@ export const createUser = async(req, res, next) => {
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,
-      display_name: newUser.display_name
+      display_name: newUser.display_name,
+      avatar_color: newUser.avatar_color
     });
   }
   catch (err) {
