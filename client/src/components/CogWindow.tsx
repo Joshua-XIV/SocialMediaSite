@@ -1,20 +1,27 @@
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
 import { useThemeStyles } from "../hooks/useThemeStyles";
+import { logout } from "../api/auth";
 import CogButton from "./CogButton";
 import SunImage from "../assets/sun.svg";
 import MoonImage from "../assets/moon.svg";
-import { useAuth } from "../contexts/AuthContext";
-import { logout } from "../api/auth";
+import AvatarColorPicker from "./AvatarColorPicker";
 
 interface CogWindowProps {
   openLogin: () => void;
   closeWindow: () => void;
 }
 
-const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
+const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
   const { theme, setTheme } = useTheme();
   const { bgColor, textColor } = useThemeStyles();
-  const { isLoggedIn, setIsLoggedIn, setUsername, setDisplayName } = useAuth();
+  const {
+    isLoggedIn,
+    setIsLoggedIn,
+    setUsername,
+    setDisplayName,
+    avatarColor,
+  } = useAuth();
 
   const toggleTheme = () => {
     setTheme(theme === 0 ? 1 : 0);
@@ -22,7 +29,7 @@ const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
 
   const handleSettings = () => {};
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     await logout();
     setIsLoggedIn(false);
     setUsername("");
@@ -33,12 +40,26 @@ const CogWindow = ({openLogin, closeWindow} : CogWindowProps) => {
   return (
     <div
       className={`fixed mt-[1.5rem] mr-[1rem] right-0 flex flex-col justify-center items-center ${textColor} rounded-2xl p-2 shadow space-y-1`}
-      style={{backgroundColor : bgColor }}
+      style={{ backgroundColor: bgColor }}
     >
-      {!isLoggedIn && <CogButton onClick={ () => {openLogin(); closeWindow();}} text="Login/Sign-Up" />}
-      {isLoggedIn && <CogButton onClick={() => ""} text="View Profile"/>}
+      {!isLoggedIn && (
+        <CogButton
+          onClick={() => {
+            openLogin();
+            closeWindow();
+          }}
+          text="Login/Sign-Up"
+        />
+      )}
+      {isLoggedIn && <CogButton onClick={() => ""} text="View Profile" />}
+      {isLoggedIn && (
+        <AvatarColorPicker
+          currentColor={avatarColor || "#3B82F6"}
+          className="mb-2"
+        />
+      )}
       <CogButton onClick={handleSettings} text="Settings" />
-      {isLoggedIn && <CogButton onClick={handleLogout} text="Logout"/>}
+      {isLoggedIn && <CogButton onClick={handleLogout} text="Logout" />}
       <div className="flex justify-center items-center space-x-1">
         <img src={SunImage} className="w-5 h-5"></img>
         <label className="relative inline-flex items-center cursor-pointer">
