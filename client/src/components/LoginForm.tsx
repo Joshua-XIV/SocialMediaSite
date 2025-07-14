@@ -51,7 +51,7 @@ const LoginForm = ({onClose, signUpView} : LoginFormProps) => {
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
       } else {
-        setError("Login failed. Please try again.");
+        setError(message);
       }
     }
   };

@@ -9,8 +9,9 @@ export async function login(emailOrUsername: string, password: string) {
   });
 
   if (!res.ok) {
-    const { error } = await res.json();
-    throw new Error(error || "Failed to login");
+    const data = await res.json();
+    const errorMsg = data.message || data.error || "Failed to login";
+    throw new Error(errorMsg);
   }
   return res.json();
 }
