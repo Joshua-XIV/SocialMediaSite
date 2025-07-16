@@ -4,7 +4,15 @@ import { attachUserIfPossible, authenticate } from '../middleware/authenticate.j
 
 const router = express.Router();
 
-router.post('/', authenticate, createPost);
+const postLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 5,
+  handler: (req, res) => {
+    res.status(429).json({ message: "Posting too many posts, Slow Down!" });
+  }
+});
+
+router.post('/', authenticate, postLimiter, createPost);
 router.get('/', attachUserIfPossible ,getHomePosts);
 router.get('/:id', attachUserIfPossible, getPost);
 router.patch('/:id/like', authenticate, likePost);
