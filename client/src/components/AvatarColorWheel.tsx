@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useThemeStyles } from '../hooks/useThemeStyles';
+import React, { useState, useRef, useEffect } from "react";
+import { useThemeStyles } from "../hooks/useThemeStyles";
 
 interface AvatarColorWheelProps {
   currentColor: string;
@@ -10,7 +10,7 @@ interface AvatarColorWheelProps {
 const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
   currentColor,
   onColorChange,
-  className = ''
+  className = "",
 }) => {
   const [selectedColor, setSelectedColor] = useState(currentColor);
   const [hue, setHue] = useState(0);
@@ -18,14 +18,20 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
   const { bgColor, borderColor, textColor } = useThemeStyles();
   const wheelRef = useRef<HTMLCanvasElement>(null);
 
+  const HUE_MAX = 360;
+  const SATURATION_MAX = 100;
+  const LIGHTNESS_FIXED = 50;
+
   // Convert HSL to hex
   const hslToHex = (h: number, s: number, l: number): string => {
     l /= 100;
-    const a = s * Math.min(l, 1 - l) / 100;
+    const a = (s * Math.min(l, 1 - l)) / 100;
     const f = (n: number) => {
       const k = (n + h / 30) % 12;
       const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-      return Math.round(255 * color).toString(16).padStart(2, '0');
+      return Math.round(255 * color)
+        .toString(16)
+        .padStart(2, "0");
     };
     return `#${f(0)}${f(8)}${f(4)}`;
   };
@@ -46,9 +52,15 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
       switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
       }
       h /= 6;
     }
@@ -61,7 +73,7 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
     const canvas = wheelRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const centerX = canvas.width / 2;
@@ -74,9 +86,9 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
     // Draw color wheel
     for (let angle = 0; angle < 360; angle += 1) {
       for (let sat = 0; sat <= radius; sat += 1) {
-        const x = centerX + sat * Math.cos((angle - 90) * Math.PI / 180);
-        const y = centerY + sat * Math.sin((angle - 90) * Math.PI / 180);
-        
+        const x = centerX + sat * Math.cos(((angle - 90) * Math.PI) / 180);
+        const y = centerY + sat * Math.sin(((angle - 90) * Math.PI) / 180);
+
         const hue = angle;
         const saturation = (sat / radius) * 100;
         const lightness = 50;
@@ -87,9 +99,16 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
     }
 
     // Draw center (white to black gradient)
-    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * 0.3);
-    gradient.addColorStop(0, 'white');
-    gradient.addColorStop(1, 'black');
+    const gradient = ctx.createRadialGradient(
+      centerX,
+      centerY,
+      0,
+      centerX,
+      centerY,
+      radius * 0.3
+    );
+    gradient.addColorStop(0, "white");
+    gradient.addColorStop(1, "black");
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius * 0.3, 0, 2 * Math.PI);
@@ -115,7 +134,7 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
 
     if (distance <= radius) {
       // Calculate hue and saturation
-      const angle = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
+      const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 90 + 360) % 360;
       const sat = Math.min(distance / radius, 1) * 100;
 
       setHue(angle);
@@ -167,7 +186,11 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
               value={selectedColor}
               onChange={(e) => setSelectedColor(e.target.value)}
               className="w-full px-2 py-1 text-sm border rounded"
-              style={{ borderColor, backgroundColor: bgColor, color: textColor }}
+              style={{
+                borderColor,
+                backgroundColor: bgColor,
+                color: textColor,
+              }}
             />
           </div>
         </div>
@@ -175,39 +198,57 @@ const AvatarColorWheel: React.FC<AvatarColorWheelProps> = ({
         {/* HSL Values */}
         <div className="grid grid-cols-3 gap-2 text-xs">
           <div>
-            <label className="block mb-1" style={{ color: textColor }}>H</label>
+            <label className="block mb-1" style={{ color: textColor }}>
+              H
+            </label>
             <input
               type="number"
               min="0"
-              max="360"
+              max={HUE_MAX}
               value={Math.round(hue)}
               onChange={(e) => setHue(Number(e.target.value))}
               className="w-full px-2 py-1 border rounded"
-              style={{ borderColor, backgroundColor: bgColor, color: textColor }}
+              style={{
+                borderColor,
+                backgroundColor: bgColor,
+                color: textColor,
+              }}
             />
           </div>
           <div>
-            <label className="block mb-1" style={{ color: textColor }}>S</label>
+            <label className="block mb-1" style={{ color: textColor }}>
+              S
+            </label>
             <input
               type="number"
               min="0"
-              max="100"
+              max={SATURATION_MAX}
               value={Math.round(saturation)}
               onChange={(e) => setSaturation(Number(e.target.value))}
               className="w-full px-2 py-1 border rounded"
-              style={{ borderColor, backgroundColor: bgColor, color: textColor }}
+              style={{
+                borderColor,
+                backgroundColor: bgColor,
+                color: textColor,
+              }}
             />
           </div>
           <div>
-            <label className="block mb-1" style={{ color: textColor }}>L</label>
+            <label className="block mb-1" style={{ color: textColor }}>
+              L
+            </label>
             <input
               type="number"
               min="0"
-              max="100"
-              value="50"
+              max={SATURATION_MAX}
+              value={LIGHTNESS_FIXED}
               disabled
               className="w-full px-2 py-1 border rounded opacity-50"
-              style={{ borderColor, backgroundColor: bgColor, color: textColor }}
+              style={{
+                borderColor,
+                backgroundColor: bgColor,
+                color: textColor,
+              }}
             />
           </div>
         </div>

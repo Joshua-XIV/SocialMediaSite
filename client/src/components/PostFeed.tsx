@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { getHomePosts } from '../api/post';
-import Post from './Post';
-import type { PostData } from '../util/types';
-import { useThemeStyles } from '../hooks/useThemeStyles';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getHomePosts } from "../api/post";
+import Post from "./Post";
+import type { PostData } from "../util/types";
+import { useThemeStyles } from "../hooks/useThemeStyles";
+
+const MAX_POST_LIMIT = 10;
 
 const PostFeed = () => {
   const [posts, setPosts] = useState<PostData[]>([]);
@@ -11,7 +13,6 @@ const PostFeed = () => {
   const [isFetching, setIsFetching] = useState(true);
   const { bgColor } = useThemeStyles();
   const loader = useRef(null);
-  const MAX_POST_LIMIT = 10;
 
   const fetchPost = useCallback(async () => {
     if (!hasMore) return;
@@ -19,8 +20,10 @@ const PostFeed = () => {
     try {
       const newPosts = await getHomePosts(MAX_POST_LIMIT, offset);
       setPosts((prev) => {
-        const ids = new Set(prev.map(p => p.id));
-        const uniqueNewPosts = newPosts.filter((p: { id: number; }) => !ids.has(p.id));
+        const ids = new Set(prev.map((p) => p.id));
+        const uniqueNewPosts = newPosts.filter(
+          (p: { id: number }) => !ids.has(p.id)
+        );
         return [...prev, ...uniqueNewPosts];
       });
       setHasMore(newPosts.length === MAX_POST_LIMIT);
@@ -54,19 +57,23 @@ const PostFeed = () => {
   }, [hasMore, isFetching]);
 
   return (
-    <div className='flex flex-col px-3 w-full h-[calc(100vh-3rem)]'>
-      <div className='flex flex-col p-4 items-center gap-y-3'>
+    <div className="flex flex-col px-3 w-full h-[calc(100vh-3rem)]">
+      <div className="flex flex-col p-4 items-center gap-y-3">
         {posts.map((post) => (
-          <div key={post.id} style={{backgroundColor :bgColor}} className='flex w-full rounded-3xl'>
-            <Post key={post.id} {...post}/>
+          <div
+            key={post.id}
+            style={{ backgroundColor: bgColor }}
+            className="flex w-full rounded-3xl"
+          >
+            <Post key={post.id} {...post} />
           </div>
         ))}
       </div>
-      <div ref={loader} className= 'text-gray-400 text-center pb-4'>
+      <div ref={loader} className="text-gray-400 text-center pb-4">
         {!hasMore && !isFetching && <p>No More Posts!</p>}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PostFeed
+export default PostFeed;
