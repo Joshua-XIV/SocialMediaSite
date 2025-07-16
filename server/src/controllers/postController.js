@@ -1,6 +1,9 @@
 import {pool as db} from '../database.js';
 import HttpError from '../utils/errorUtils.js';
 
+const MAX_POST_LENGTH = 255;
+const MAX_POSTS_LIMIT = 10;
+
 export const createPost = async(req, res, next) => {
   if (!req.body) {
     return next(new HttpError('Request body is missing', 400));
@@ -9,7 +12,7 @@ export const createPost = async(req, res, next) => {
   const userID = req.user.id;
   const content = req.body.content;
 
-  if (content.length > 255) {
+  if (content.length > MAX_POST_LENGTH) {
     return(next(new HttpError('Post Too Long', 400)))
   }
 
@@ -26,7 +29,7 @@ export const createPost = async(req, res, next) => {
 }
 
 export const getHomePosts = async(req, res, next) => {
-  const maxLimit = 10;
+  const maxLimit = MAX_POSTS_LIMIT;
   const limit = Math.min(req.query.limit ? Number(req.query.limit) : maxLimit, maxLimit);
   const offset = parseInt(req.query.offset) || 0;
   const userID = req.user?.id || null;

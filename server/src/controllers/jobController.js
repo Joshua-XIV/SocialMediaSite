@@ -1,6 +1,12 @@
 import {pool as db} from '../database.js'
 import HttpError from '../utils/errorUtils.js'
 
+const MAX_DESCRIPTION_LENGTH = 3000;
+const MAX_RESPONSIBILITIES_LENGTH = 2000;
+const MAX_REQUIREMENT_SUMMARY_LENGTH = 1000;
+const HOURS_PER_YEAR = 2080;
+const PART_TIME_HOURS_PER_YEAR = 1040;
+
 export const getJobs = async(req, res, next) => {
   try {
     const parseMulti = (str) => (str ? str.split(',').map(s => s.trim()) : undefined);
@@ -57,8 +63,8 @@ export const getJobs = async(req, res, next) => {
       queryParams.push(desired);
       conditions.push(`
         CASE 
-          WHEN compensation_type = 'Hourly' AND commitment = 'Part-time' THEN compensation_max * 1040
-          WHEN compensation_type = 'Hourly' THEN compensation_max * 2080
+          WHEN compensation_type = 'Hourly' AND commitment = 'Part-time' THEN compensation_max * ${PART_TIME_HOURS_PER_YEAR}
+          WHEN compensation_type = 'Hourly' THEN compensation_max * ${HOURS_PER_YEAR}
           ELSE compensation_max
         END >= $${queryParams.length}
       `);
@@ -130,9 +136,9 @@ export const createJob = async (req, res, next) => {
     }
 
     const limits = [
-      { field: "description", max: 3000 },
-      { field: "responsibilities", max: 2000 },
-      { field: "requirement_summary", max: 1000 },
+      { field: "description", max: MAX_DESCRIPTION_LENGTH },
+      { field: "responsibilities", max: MAX_RESPONSIBILITIES_LENGTH },
+      { field: "requirement_summary", max: MAX_REQUIREMENT_SUMMARY_LENGTH },
     ];
 
     for (const { field, max } of limits) {

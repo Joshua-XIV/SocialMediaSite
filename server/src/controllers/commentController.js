@@ -1,6 +1,9 @@
 import {pool as db} from '../database.js'
 import HttpError from '../utils/errorUtils.js'
 
+const MAX_COMMENT_LENGTH = 255;
+const MAX_COMMENTS_LIMIT = 10;
+
 export const createComment = async(req, res, next) => {
   if (!req.body) {
     return next(new HttpError("Request body is missing", 400));
@@ -9,7 +12,7 @@ export const createComment = async(req, res, next) => {
   const userID = req.user.id;
   const { postID, content, parentID } = req.body;
 
-  if (content.length > 255) {
+  if (content.length > MAX_COMMENT_LENGTH) {
     return next(new HttpError("Comment Too Long", 400));
   }
   
@@ -85,7 +88,7 @@ export const getComments = async (req, res, next) => {
 
   const postID = req.query.postID ? parseInt(req.query.postID) : null;
   const parentID = req.query.parentID ? parseInt(req.query.parentID) : null;
-  const maxLimit = 10;
+  const maxLimit = MAX_COMMENTS_LIMIT;
   const limit = Math.min(parseInt(req.query.limit), maxLimit);
   const offset = parseInt(req.query.offset) || 0;
 
