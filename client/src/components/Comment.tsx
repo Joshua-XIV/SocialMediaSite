@@ -98,7 +98,7 @@ const Comment = ({
                       }}
                     />
                     <p className={`text-gray-400`}>{likeCount}</p>
-                    <p className={`text-gray-400`}>Replies: {replyCount}</p>
+                    <span className={`text-gray-400`}>💬 {replyCount}</span>
                   </div>
                 </div>
               </section>
@@ -144,7 +144,7 @@ const Comment = ({
                     }}
                   />
                   <p className={`text-gray-400`}>{likeCount}</p>
-                  <p className={`text-gray-400`}>Replies: {replyCount}</p>
+                  <span className={`text-gray-400`}>💬 {replyCount}</span>
                 </div>
               </div>
             </section>
