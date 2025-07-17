@@ -1,4 +1,5 @@
 import express from 'express'
+import { rateLimit } from 'express-rate-limit';
 import { createPost, getHomePosts, getPost, likePost, removeLikePost } from '../controllers/postController.js';
 import { attachUserIfPossible, authenticate } from '../middleware/authenticate.js';
 

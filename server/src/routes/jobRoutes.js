@@ -1,4 +1,5 @@
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { authenticate } from '../middleware/authenticate.js';
 import { getJobs, createJob } from '../controllers/jobController.js';
 

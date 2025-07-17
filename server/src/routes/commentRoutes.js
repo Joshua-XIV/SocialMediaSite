@@ -1,4 +1,5 @@
 import express from 'express'
+import { rateLimit } from 'express-rate-limit';
 import { createComment, getComment, getComments, getCommentThread, likeComment, removeLikeComment } from '../controllers/commentController.js';
 import { attachUserIfPossible, authenticate } from '../middleware/authenticate.js'
 
