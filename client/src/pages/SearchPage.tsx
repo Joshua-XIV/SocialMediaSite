@@ -4,7 +4,6 @@ import { useThemeStyles } from "../hooks/useThemeStyles";
 import { searchAll } from "../api/search";
 import Avatar from "../components/Avatar";
 import { formatTimeShort } from "../util/formatTime";
-import { text } from "@fortawesome/fontawesome-svg-core";
 import { FiHeart } from "react-icons/fi";
 import { likePost, removeLikePost } from "../api/post";
 import { useAuth } from "../contexts/AuthContext";
@@ -28,7 +27,7 @@ type SearchResult = {
 };
 
 export default function SearchPage() {
-  const { textColor, borderColor, bgColor, popupColor, hoverColor } =
+  const { textColor, borderColor, bgColor } =
     useThemeStyles();
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
