@@ -156,7 +156,7 @@ const NavBar = ({ isMobile, openSideBar }: NavBarProps) => {
           <div ref={categoryRef} className="relative">
             <button
               type="button"
-              className={`flex items-center gap-1 px-2 py-1 rounded-l-3xl border-none focus:outline-none ${textColor}`}
+              className={`flex items-center gap-1 px-2 py-1 rounded-l-3xl border-none focus:outline-none cursor-pointer ${textColor}`}
               style={{
                 backgroundColor: inputColor,
                 transition: "background 0.2s",
@@ -187,7 +187,7 @@ const NavBar = ({ isMobile, openSideBar }: NavBarProps) => {
                   <button
                     key={option.key}
                     type="button"
-                    className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${
+                    className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 cursor-pointer ${
                       searchCategory === option.key
                         ? "bg-blue-50 text-blue-600"
                         : textColor
@@ -228,7 +228,7 @@ const NavBar = ({ isMobile, openSideBar }: NavBarProps) => {
           />
           <button
             type="submit"
-            className="px-2 py-1 rounded-2xl text-white bg-blue-500 hover:bg-blue-600 transition-colors"
+            className="px-2 py-1 rounded-2xl text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer"
           >
             Search
           </button>
