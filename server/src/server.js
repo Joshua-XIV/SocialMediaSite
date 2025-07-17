@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js'
 import postRoutes from './routes/postRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
 import commentRoutes from './routes/commentRoutes.js'
+import searchRoutes from './routes/searchRoutes.js'
 import logger from './middleware/logger.js'
 import errorHandler from './middleware/error.js'
 import dotenv from 'dotenv'
@@ -34,6 +35,7 @@ app.use('/api/user', userRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/comments', commentRoutes)
 app.use('/api/jobs', jobRoutes)
+app.use('/api/search', searchRoutes)
 
 //Error Handler
 app.use(errorHandler)
