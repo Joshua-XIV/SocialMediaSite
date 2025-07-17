@@ -22,7 +22,7 @@ const Comment = ({
 }: CommentData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);
-  const [likeCount, setLikeCount] = useState(total_likes || 0);
+  const [likeCount, setLikeCount] = useState(Number(total_likes) || 0);
   const replyCount = total_replies ?? 0;
   const { isLoggedIn } = useAuth();
   const { openLogin } = useModal();
@@ -30,13 +30,24 @@ const Comment = ({
   const heartColor = "red";
 
   const handleToggleLike = async () => {
-    setIsLiked((prev) => !prev);
-    setLikeCount((prev) => Number(prev) + (isLiked ? -1 : 1));
+    const newIsLiked = !isLiked;
+    const newLikeCount = likeCount + (newIsLiked ? 1 : -1);
+
+    // Optimistic update
+    setIsLiked(newIsLiked);
+    setLikeCount(newLikeCount);
+
     try {
-      if (!isLiked) likeComment(id);
-      else removeLikeComment(id);
+      if (newIsLiked) {
+        await likeComment(id);
+      } else {
+        await removeLikeComment(id);
+      }
     } catch (err) {
       console.error(err);
+      // Revert on error
+      setIsLiked(isLiked);
+      setLikeCount(likeCount);
     }
   };
 
@@ -79,9 +90,11 @@ const Comment = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        `${
-                          isLoggedIn ? handleToggleLike() : openLogin("login")
-                        }`;
+                        if (isLoggedIn) {
+                          handleToggleLike();
+                        } else {
+                          openLogin("login");
+                        }
                       }}
                     />
                     <p className={`text-gray-400`}>{likeCount}</p>
@@ -123,7 +136,11 @@ const Comment = ({
                       backgroundSize: 150,
                     }}
                     onClick={() => {
-                      `${isLoggedIn ? handleToggleLike() : openLogin("login")}`;
+                      if (isLoggedIn) {
+                        handleToggleLike();
+                      } else {
+                        openLogin("login");
+                      }
                     }}
                   />
                   <p className={`text-gray-400`}>{likeCount}</p>

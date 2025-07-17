@@ -159,7 +159,7 @@ export default function JobPage() {
     <div className="px-4 pb-4">
       {/* Filter buttons */}
       <section className="z-10 sticky top-[3rem] pb-1" style={{backgroundColor : backgroundLayer}}>
-        <div className="flex flex-wrap gap-3 mb-4 pt-4">
+        <div className="flex flex-wrap gap-3 mb-4 pt-4 justify-center">
           {filterConfig.map((filter) => (
             <button
               key={filter.key}
@@ -260,7 +260,7 @@ export default function JobPage() {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-4 items-center pt-1">
+      <div className="flex flex-wrap gap-4 mb-4 justify-between items-center pt-1">
         {/* Sort by dropdown */}
         <div>
           <label htmlFor="sortSelect" className={`mr-2 ${textColor} font-semibold`}>
