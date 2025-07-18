@@ -1,28 +1,38 @@
 import { useState } from "react";
-import LoginSignUpInput from "./LoginSignUpInput"
+import LoginSignUpInput from "./LoginSignUpInput";
 import { useThemeStyles } from "../hooks/useThemeStyles";
-import { signUp } from "../api/auth";
-import { login } from "../api/auth";
+import { signUp, verifyCode, resendCode } from "../api/auth";
 import { useAuth } from "../contexts/AuthContext";
+import { useRef } from "react";
 
 interface SignUpFormProps {
   onClose: () => void;
   loginView: () => void;
 }
 
-const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
+const SignUpForm = ({ onClose, loginView }: SignUpFormProps) => {
   const { setIsLoggedIn } = useAuth();
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = 
-    useState<{ username?: string; displayName?: string; email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    username?: string;
+    displayName?: string;
+    email?: string;
+    password?: string;
+  }>({});
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendCount, setResendCount] = useState(0);
+  const [resending, setResending] = useState(false);
 
   const { borderColor, textColor, hoverColor } = useThemeStyles();
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -42,36 +52,124 @@ const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
       return;
     }
 
-    setFieldErrors({});    
+    setFieldErrors({});
 
     try {
       await signUp(username, displayName, email, password);
-      await login(username, password)
+      setShowCodeInput(true);
+      setPendingEmail(email);
+    } catch (err: any) {
+      const message = err.message?.toLowerCase?.() || "";
+      const fieldErrs: typeof fieldErrors = {};
+
+      if (message.includes("username")) {
+        fieldErrs.username = "Username Taken";
+      }
+      if (message.includes("email")) {
+        fieldErrs.email = "Email Taken";
+      }
+
+      if (Object.keys(fieldErrs).length > 0) {
+        setFieldErrors(fieldErrs);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setVerifying(true);
+    try {
+      await verifyCode(pendingEmail, code);
       setIsLoggedIn(true);
       onClose();
       window.location.reload();
     } catch (err: any) {
-        const message = err.message?.toLowerCase?.() || "";
-        const fieldErrs: typeof fieldErrors = {};
-
-        if (message.includes("username")) {
-          fieldErrs.username = "Username Taken";
-        }
-        if (message.includes("email")) {
-          fieldErrs.email = "Email Taken";
-        }
-
-        if (Object.keys(fieldErrs).length > 0) {
-          setFieldErrors(fieldErrs);
-        } else {
-          setError("Something went wrong. Please try again.");
-        }
+      setError(err.message || "Invalid or expired code");
+    } finally {
+      setVerifying(false);
     }
   };
 
+  if (showCodeInput) {
+    return (
+      <form className="z-20 px-[4rem] mt-[6rem]" onSubmit={handleVerify}>
+        {error && (
+          <div className="text-red-400 text-center mb-3 min-h-[1.5rem]">
+            {error}
+          </div>
+        )}
+        <div className="mb-4">
+          <label className={`block mb-2 ${textColor}`}>
+            Enter the verification code sent to your email
+          </label>
+          <LoginSignUpInput
+            placeholder="Verification Code"
+            value={code}
+            onChange={setCode}
+            error={undefined}
+          />
+          <div className="flex items-center mt-2">
+            <button
+              type="button"
+              disabled={resendCount >= 2 || resending}
+              onClick={async () => {
+                setError("");
+                setResending(true);
+                try {
+                  await resendCode(pendingEmail);
+                  setResendCount((c) => c + 1);
+                } catch (err: any) {
+                  setError(err.message || "Failed to resend code");
+                } finally {
+                  setResending(false);
+                }
+              }}
+              className={`ml-2 px-3 py-1 rounded text-sm border ${borderColor} ${textColor} ${
+                resendCount >= 2
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:bg-blue-100 cursor-pointer"
+              }`}
+            >
+              {resending
+                ? "Resending..."
+                : `Resend Code${
+                    resendCount > 0 ? ` (${2 - resendCount} left)` : ""
+                  }`}
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-row justify-between mx-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className={`left-0 mt-4 px-4 py-2 rounded bg-red-600 ${textColor} cursor-pointer ${borderColor} 
+                        border-1 shadow opacity-80 hover:opacity-100 w-[5rem] text-center`}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!code || verifying}
+            className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
+                        ${!code ? "" : "hover:cursor-pointer"}
+                        ${!code ? "opacity-80" : "opacity-80 hover:opacity-100"}
+                        ${!code ? hoverColor : "bg-blue-600"}`}
+          >
+            {verifying ? "Verifying..." : "Verify"}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <form className="z-20 px-[4rem] mt-[6rem]" onSubmit={handleSubmit}>
-      {error && <div className="text-red-400 text-center mb-1 h-[1.5rem]">{error}</div>}
+      {error && (
+        <div className="text-red-400 text-center mb-1 h-[1.5rem]">{error}</div>
+      )}
       <div className="">
         <LoginSignUpInput
           placeholder="Username"
@@ -112,27 +210,39 @@ const SignUpForm = ({onClose, loginView} : SignUpFormProps) => {
         </div>
       </div>
       <div className="flex flex-row justify-between mx-2">
-        <button 
+        <button
           type="button"
           onClick={onClose}
           className={`left-0 mt-4 px-4 py-2 rounded bg-red-600 ${textColor} cursor-pointer ${borderColor} 
                       border-1 shadow opacity-80 hover:opacity-100 w-[5rem] text-center`}
         >
           Cancel
-        </button>             
-        <button 
-          type="submit" 
+        </button>
+        <button
+          type="submit"
           disabled={!username || !displayName || !email || !password}
           className={`left-0 mt-4 px-4 py-2 rounded ${textColor} border-1 shadow text-center w-[5rem] ${borderColor} 
-                      ${(!password || !username || !displayName || !email)? '' : 'hover:cursor-pointer'}
-                      ${(!password || !username || !displayName || !email) ? 'opacity-80' : 'opacity-80 hover:opacity-100'} 
-                      ${(!password || !username || !displayName || !email) ? hoverColor : 'bg-blue-600'}`}
+                      ${
+                        !password || !username || !displayName || !email
+                          ? ""
+                          : "hover:cursor-pointer"
+                      }
+                      ${
+                        !password || !username || !displayName || !email
+                          ? ""
+                          : "bg-blue-600"
+                      }
+                      ${
+                        !password || !username || !displayName || !email
+                          ? hoverColor
+                          : ""
+                      }`}
         >
           Create
         </button>
       </div>
     </form>
   );
-}
+};
 
-export default SignUpForm
+export default SignUpForm;
