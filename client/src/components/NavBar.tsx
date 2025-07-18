@@ -158,8 +158,7 @@ const NavBar = ({ isMobile, openSideBar }: NavBarProps) => {
               type="button"
               className={`flex items-center gap-1 px-2 py-1 rounded-l-3xl border-none focus:outline-none cursor-pointer ${textColor}`}
               style={{
-                backgroundColor: inputColor,
-                transition: "background 0.2s",
+                backgroundColor: inputColor
               }}
               onClick={() => setShowCategoryDropdown((prev) => !prev)}
               tabIndex={0}
