@@ -1,7 +1,6 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
-import { rateLimit } from 'express-rate-limit'
 import userRoutes from './routes/userRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import postRoutes from './routes/postRoutes.js'
@@ -10,6 +9,7 @@ import commentRoutes from './routes/commentRoutes.js'
 import searchRoutes from './routes/searchRoutes.js'
 import logger from './middleware/logger.js'
 import errorHandler from './middleware/error.js'
+import { runCleanupTasks } from './utils/cleanupUtils.js'
 import dotenv from 'dotenv'
 dotenv.config();
 
@@ -36,6 +36,20 @@ app.use('/api/posts', postRoutes)
 app.use('/api/comments', commentRoutes)
 app.use('/api/jobs', jobRoutes)
 app.use('/api/search', searchRoutes)
+
+// Cleanup tasks
+setInterval(async () => {
+  try {
+    await runCleanupTasks();
+  } catch (err) {
+    console.error('Cleanup task failed:', err);
+  }
+}, 15 * 60 * 1000); // 15 minutes
+
+// Also run cleanup on startup
+runCleanupTasks().catch(err => {
+  console.error('Initial cleanup failed:', err);
+});
 
 //Error Handler
 app.use(errorHandler)

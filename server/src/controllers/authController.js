@@ -3,6 +3,7 @@ import { clearAuthCookies, setAuthCookies } from '../utils/cookieUtils.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/tokenUtils.js';
 import HttpError from '../utils/errorUtils.js'
 import bcrypt from 'bcrypt';
+import { sendVerificationEmail } from '../utils/emailUtils.js';
 
 const saltRounds = 10;
 
@@ -29,7 +30,7 @@ export const createUser = async(req, res, next) => {
   if (display_name.length > 40) return next(new HttpError("Display Name can't be longer than 40 characters", 400));
   if (!email) missingField.push("Email");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-  return next(new HttpError("Invalid Email Format", 400));
+    return next(new HttpError("Invalid Email Format", 400));
   }
   if (!password) missingField.push("Password");
   if (password.length > 64) return next(new HttpError("Password can't be longer than 64 characters", 400));
@@ -38,34 +39,46 @@ export const createUser = async(req, res, next) => {
     return next(new HttpError(`Missing required fields: ${missingField.join(", ")}`, 400));
   }
 
-  // Insert user into db
   try {
+    // Check username in user and pending_user
+    const usernameTaken = await db.query(
+      `SELECT 1 FROM "user" WHERE username = $1 UNION ALL SELECT 1 FROM pending_user WHERE username = $1 LIMIT 1`,
+      [username.toLowerCase()]
+    );
+    if (usernameTaken.rows.length > 0) {
+      return next(new HttpError("Username Taken", 409));
+    }
+
+    // Check email in user and pending_user
+    const emailTaken = await db.query(
+      `SELECT 1 FROM "user" WHERE email = $1 UNION ALL SELECT 1 FROM pending_user WHERE email = $1 LIMIT 1`,
+      [email]
+    );
+    if (emailTaken.rows.length > 0) {
+      return next(new HttpError("Email Taken", 409));
+    }
+
     const password_hash = await bcrypt.hash(password, saltRounds);
     const avatar_color = getRandomAvatarColor();
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const newUserAccount = await db.query(`INSERT INTO "user" (username, display_name, email, password_hash, avatar_color) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [username.toLowerCase(), display_name, email, password_hash, avatar_color]
+    const pendingUser = await db.query(
+      `INSERT INTO pending_user (username, display_name, email, password_hash, avatar_color, verification_code, verification_expires) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [username.toLowerCase(), display_name, email, password_hash, avatar_color, verificationCode, expiresAt]
     );
 
-    const newUser = newUserAccount.rows[0];
+    await sendVerificationEmail(email, verificationCode, 'signup');
 
     res.status(201).json({
-      id: newUser.id,
-      username: newUser.username,
-      display_name: newUser.display_name,
-      avatar_color: newUser.avatar_color
+      message: "Verification code sent to your email",
+      username,
+      display_name,
+      email,
+      avatar_color
     });
-  }
-  catch (err) {
+  } catch (err) {
     console.log("Error: ", err);
-    if (err.code === '23505') {
-      if (err.detail && err.detail.includes("username")) {
-        return next(new HttpError("Username Taken", 409));
-      }
-      if (err.detail && err.detail.includes("email")) {
-        return next(new HttpError("Email Taken", 409));
-      }
-    }
     next(new HttpError("Something went wrong", 500));
   }
 };
@@ -79,7 +92,6 @@ export const loginUser = async (req, res, next) => {
     return next(new HttpError("Missing Fields(s)", 403));
   }
 
-  // Check credentials from db
   try {
     const userResult = await db.query(
       `SELECT * FROM "user" WHERE username = $1 OR email = $1 LIMIT 1`,
@@ -97,21 +109,18 @@ export const loginUser = async (req, res, next) => {
       return next(new HttpError("Invalid Credentials", 401))
     }
 
-    const userPayload = {id: user.id, username: user.username};
-    const accessToken = generateAccessToken(userPayload);
-    const refreshToken = generateRefreshToken(userPayload);
+    // Always require verification code for login
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await db.query(
-      `INSERT INTO refresh_token (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
-      [refreshToken, user.id]
-    )
-
-    // Set cookies for tokens
-    setAuthCookies(res, accessToken, refreshToken);
-
+      `UPDATE "user" SET verification_code = $1, verification_expires = $2 WHERE id = $3`,
+      [verificationCode, expiresAt, user.id]
+    );
+    await sendVerificationEmail(user.email, verificationCode, 'login');
     return res.status(200).json({
-      success: "Logged In",
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+      message: "Verification code sent to your email. Please verify to complete login.",
+      requiresVerification: true,
+      email: user.email
     });
   } catch (err) {
     return next(new HttpError("Internal Server Error", 500));
@@ -148,3 +157,136 @@ export const logoutUser = async (req, res) => {
   clearAuthCookies(res);
   res.sendStatus(204);
 }
+
+export const verifyCode = async (req, res, next) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return next(new HttpError("Missing email or code", 400));
+  }
+
+  try {
+    // First, check pending_user for signup verification
+    let result = await db.query(
+      `SELECT * FROM pending_user WHERE email = $1 AND verification_code = $2 AND verification_expires > NOW()`,
+      [email, code]
+    );
+    if (result.rows.length > 0) {
+      const pending = result.rows[0];
+      // Insert into user table
+      const userInsert = await db.query(
+        `INSERT INTO "user" (username, display_name, email, password_hash, avatar_color, email_verified) VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING *`,
+        [pending.username, pending.display_name, pending.email, pending.password_hash, pending.avatar_color]
+      );
+      // Delete from pending_user
+      await db.query(`DELETE FROM pending_user WHERE id = $1`, [pending.id]);
+      // Issue tokens
+      const user = userInsert.rows[0];
+      const userPayload = { id: user.id, username: user.username };
+      const accessToken = generateAccessToken(userPayload);
+      const refreshToken = generateRefreshToken(userPayload);
+      await db.query(
+        `INSERT INTO refresh_token (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
+        [refreshToken, user.id]
+      );
+      setAuthCookies(res, accessToken, refreshToken);
+      return res.json({
+        success: "Email verified and logged in",
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          display_name: user.display_name,
+          avatar_color: user.avatar_color
+        }
+      });
+    }
+    // If not found in pending_user, check user table for login verification
+    result = await db.query(
+      `SELECT * FROM "user" WHERE email = $1 AND verification_code = $2 AND verification_expires > NOW()`,
+      [email, code]
+    );
+    if (result.rows.length === 0) {
+      return next(new HttpError("Invalid or expired code", 400));
+    }
+    const user = result.rows[0];
+    // Clear the code after successful verification
+    await db.query(
+      `UPDATE "user" SET verification_code = NULL, verification_expires = NULL WHERE id = $1`,
+      [user.id]
+    );
+    // Issue tokens
+    const userPayload = { id: user.id, username: user.username };
+    const accessToken = generateAccessToken(userPayload);
+    const refreshToken = generateRefreshToken(userPayload);
+    await db.query(
+      `INSERT INTO refresh_token (token, user_id, expires_at) VALUES ($1, $2, NOW() + interval '30 days')`,
+      [refreshToken, user.id]
+    );
+    setAuthCookies(res, accessToken, refreshToken);
+    res.json({
+      success: "Email verified and logged in",
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        display_name: user.display_name,
+        avatar_color: user.avatar_color
+      }
+    });
+  } catch (err) {
+    next(new HttpError("Something went wrong during verification", 500));
+  }
+};
+
+export const resendVerificationCode = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return next(new HttpError("Missing email", 400));
+
+  try {
+    // First check pending_user for signup verification
+    let result = await db.query(
+      `SELECT * FROM pending_user WHERE email = $1`,
+      [email]
+    );
+    
+    if (result.rows.length > 0) {
+      // User is in pending_user (signup verification)
+      const pending = result.rows[0];
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      
+      await db.query(
+        `UPDATE pending_user SET verification_code = $1, verification_expires = $2 WHERE id = $3`,
+        [verificationCode, expiresAt, pending.id]
+      );
+      await sendVerificationEmail(email, verificationCode, 'signup');
+      return res.json({ message: "Verification code resent" });
+    }
+
+    // Check user table for login verification
+    result = await db.query(
+      `SELECT * FROM "user" WHERE email = $1`,
+      [email]
+    );
+    
+    if (result.rows.length === 0) {
+      return next(new HttpError("User not found", 404));
+    }
+    
+    const user = result.rows[0];
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    
+    await db.query(
+      `UPDATE "user" SET verification_code = $1, verification_expires = $2 WHERE id = $3`,
+      [verificationCode, expiresAt, user.id]
+    );
+    await sendVerificationEmail(email, verificationCode, 'login');
+    res.json({ message: "Verification code resent" });
+  } catch (err) {
+    next(new HttpError("Failed to resend verification code", 500));
+  }
+};
