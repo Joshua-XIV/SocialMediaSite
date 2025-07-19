@@ -225,7 +225,7 @@ const PostPage = () => {
                     }
                   }}
                 >
-                  {replyLoading ? <p>...</p> : <p>Send</p>}D
+                  {replyLoading ? <p>...</p> : <p>Send</p>}
                 </button>
               </div>
             </section>

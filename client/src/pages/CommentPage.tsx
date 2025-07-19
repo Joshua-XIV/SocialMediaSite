@@ -224,7 +224,7 @@ const CommentPage = () => {
           {/* Post Content and Reply */}
           <section className={`border-b-1 p-4 ${borderColor}`}>
             <div className="relative flex">
-              <div className="absolute left-9 top-16 bottom-0 w-px bg-gray-500"/>
+              <div className="absolute left-9 top-16 bottom-0 w-px bg-gray-500 z-0"/>
               <div className={`flex justify-center flex-col w-full`}>
                 {post && <div>
                   <Post {...post}/>
@@ -238,7 +238,7 @@ const CommentPage = () => {
             </div>
             <div className="relative flex">
               <div ref={mainCommentRef} className="flex w-full h-full">
-                <div className="absolute left-9 top-0 w-px bg-gray-500" style={{height: 56}}/>
+                <div className="absolute left-9 top-0 w-px bg-gray-500 z-0" style={{height: 56}}/>
                 {mainCommentLoading && <p>Loading...</p>}
                 {mainComment && <Comment {...mainComment}/>}
               </div>

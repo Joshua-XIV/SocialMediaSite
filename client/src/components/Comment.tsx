@@ -62,7 +62,7 @@ const Comment = ({
         >
           <section>
             <div className="flex flex-row space-x-2">
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 relative z-10">
                 <Avatar
                   displayName={display_name}
                   avatarColor={avatar_color}
@@ -109,7 +109,7 @@ const Comment = ({
       {onPage && (
         <div className={`border-b-1 p-2 ${borderColor} w-full`} style={{}}>
           <div className="flex flex-row items-start space-x-2">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative z-10">
               <Avatar
                 displayName={display_name}
                 avatarColor={avatar_color}
