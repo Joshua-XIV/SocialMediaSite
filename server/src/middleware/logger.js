@@ -1,6 +1,7 @@
-const logger = (req, res, next) => {
-  console.log(`${req.method} ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-  next();
-}
+import logger from '../utils/logger.js';
 
-export default logger;
+const loggerMiddleware = (req, res, next) => {
+  logger.logRequest(req, res, next);
+};
+
+export default loggerMiddleware;
