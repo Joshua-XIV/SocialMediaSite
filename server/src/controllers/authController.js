@@ -247,6 +247,7 @@ export const refreshTokenHandler = async (req, res, next) => {
 export const logoutUser = async (req, res) => {
   const token = req.cookies.refreshToken;
   const userId = req.user?.id;
+  const username = req.user?.username;
   
   try {
     await db.query(`DELETE FROM refresh_token WHERE token = $1`, [token]);
@@ -254,6 +255,7 @@ export const logoutUser = async (req, res) => {
     
     logger.info('User logged out successfully', {
       userId: userId,
+      username: username,
       ip: req.ip
     });
     
@@ -261,6 +263,7 @@ export const logoutUser = async (req, res) => {
   } catch (err) {
     logger.error('Logout failed', {
       userId: userId,
+      username: username,
       ip: req.ip
     }, err);
     res.sendStatus(204);
