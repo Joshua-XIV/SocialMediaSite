@@ -5,6 +5,7 @@ import { login, verifyCode, resendCode } from "../api/auth";
 import { useAuth } from "../contexts/AuthContext";
 import "./Spinner.css";
 import VerificationCodeInput from "./VerificationCodeInput";
+import logger from "../utils/logger";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -35,6 +36,11 @@ const LoginForm = ({ onClose, signUpView }: LoginFormProps) => {
     setError("");
     setLoading(true);
 
+    logger.info("Login attempt started", {
+      emailOrUsername: emailOrUsername ? "***" : "empty",
+      hasPassword: !!password,
+    });
+
     const errors: typeof fieldErrors = {};
 
     if (!emailOrUsername.trim())
@@ -42,27 +48,48 @@ const LoginForm = ({ onClose, signUpView }: LoginFormProps) => {
     if (!password.trim()) errors.password = "Password is required.";
 
     if (Object.keys(errors).length > 0) {
+      logger.warn("Login validation failed", { errors });
       setFieldErrors(errors);
+      setLoading(false);
       return;
     }
 
     setFieldErrors({});
 
     try {
+      logger.debug("Sending login request to server");
       const response = await login(emailOrUsername, password);
+
+      logger.info("Login request successful", {
+        requiresVerification: response.requiresVerification,
+        email: response.email ? "***" : "not provided",
+      });
 
       // Check if verification is required
       if (response.requiresVerification) {
+        logger.info("Verification code required", {
+          email: response.email ? "***" : "not provided",
+        });
         setShowCodeInput(true);
         setPendingEmail(response.email);
       } else {
         // This shouldn't happen with the new backend flow, but keeping for safety
+        logger.info("Login completed without verification");
         setIsLoggedIn(true);
         onClose();
         window.location.reload();
       }
     } catch (err: any) {
       const message = err.message;
+      logger.error(
+        "Login failed",
+        {
+          error: message,
+          emailOrUsername: emailOrUsername ? "***" : "empty",
+        },
+        err
+      );
+
       const errors: typeof fieldErrors = {};
 
       if (message.includes("Invalid")) {
@@ -84,13 +111,29 @@ const LoginForm = ({ onClose, signUpView }: LoginFormProps) => {
     e.preventDefault();
     setError("");
     setVerifying(true);
+
+    logger.info("Verification code submission started", {
+      email: pendingEmail ? "***" : "empty",
+      codeLength: code.length,
+    });
+
     try {
       await verifyCode(pendingEmail, code);
+      logger.info("Verification successful - user logged in");
       setIsLoggedIn(true);
       onClose();
       window.location.reload();
     } catch (err: any) {
-      setError(err.message || "Invalid or expired code");
+      const errorMessage = err.message || "Invalid or expired code";
+      logger.error(
+        "Verification failed",
+        {
+          error: errorMessage,
+          email: pendingEmail ? "***" : "empty",
+        },
+        err
+      );
+      setError(errorMessage);
     } finally {
       setVerifying(false);
     }
@@ -125,11 +168,27 @@ const LoginForm = ({ onClose, signUpView }: LoginFormProps) => {
               onClick={async () => {
                 setError("");
                 setResending(true);
+
+                logger.info("Resend code requested", {
+                  email: pendingEmail ? "***" : "empty",
+                  resendCount: resendCount + 1,
+                });
+
                 try {
                   await resendCode(pendingEmail);
+                  logger.info("Code resent successfully");
                   setResendCount((c) => c + 1);
                 } catch (err: any) {
-                  setError(err.message || "Failed to resend code");
+                  const errorMessage = err.message || "Failed to resend code";
+                  logger.error(
+                    "Failed to resend code",
+                    {
+                      error: errorMessage,
+                      email: pendingEmail ? "***" : "empty",
+                    },
+                    err
+                  );
+                  setError(errorMessage);
                 } finally {
                   setResending(false);
                 }

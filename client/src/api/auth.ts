@@ -1,19 +1,57 @@
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
+// Import logger
+import logger from "../utils/logger";
+
 export async function login(emailOrUsername: string, password: string) {
-  const res = await fetch(`${API_URL}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type" : "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ emailOrUsername, password }),
+  const startTime = Date.now();
+  
+  logger.debug("Login API call started", {
+    emailOrUsername: emailOrUsername ? "***" : "empty",
+    hasPassword: !!password
   });
 
-  if (!res.ok) {
-    const data = await res.json();
-    const errorMsg = data.message || data.error || "Failed to login";
-    throw new Error(errorMsg);
+  try {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type" : "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ emailOrUsername, password }),
+    });
+
+    const duration = Date.now() - startTime;
+
+    if (!res.ok) {
+      const data = await res.json();
+      const errorMsg = data.message || data.error || "Failed to login";
+      
+      logger.error("Login API call failed", {
+        status: res.status,
+        statusText: res.statusText,
+        error: errorMsg,
+        duration: `${duration}ms`
+      });
+      
+      throw new Error(errorMsg);
+    }
+
+    const responseData = await res.json();
+    
+    logger.info("Login API call successful", {
+      status: res.status,
+      requiresVerification: responseData.requiresVerification,
+      duration: `${duration}ms`
+    });
+
+    return responseData;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error("Login API call exception", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      duration: `${duration}ms`
+    }, error instanceof Error ? error : undefined);
+    throw error;
   }
-  return res.json();
 }
 
 export async function logout() {
@@ -46,18 +84,53 @@ export async function signUp(username: string, display_name: string, email: stri
 }
 
 export async function verifyCode(email: string, code: string) {
-  const res = await fetch(`${API_URL}/api/auth/verify`, {
-    method: 'POST',
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, code })
+  const startTime = Date.now();
+  
+  logger.debug("Verify code API call started", {
+    email: email ? "***" : "empty",
+    codeLength: code.length
   });
 
-  if (!res.ok) {
-    const { error, message } = await res.json();
-    throw new Error(error || message || "Failed to verify code");
+  try {
+    const res = await fetch(`${API_URL}/api/auth/verify`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, code })
+    });
+
+    const duration = Date.now() - startTime;
+
+    if (!res.ok) {
+      const { error, message } = await res.json();
+      const errorMsg = error || message || "Failed to verify code";
+      
+      logger.error("Verify code API call failed", {
+        status: res.status,
+        statusText: res.statusText,
+        error: errorMsg,
+        duration: `${duration}ms`
+      });
+      
+      throw new Error(errorMsg);
+    }
+
+    const responseData = await res.json();
+    
+    logger.info("Verify code API call successful", {
+      status: res.status,
+      duration: `${duration}ms`
+    });
+
+    return responseData;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error("Verify code API call exception", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      duration: `${duration}ms`
+    }, error instanceof Error ? error : undefined);
+    throw error;
   }
-  return res.json();
 }
 
 export async function resendCode(email: string) {

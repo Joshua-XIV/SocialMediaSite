@@ -9,6 +9,7 @@ import { Link, useLocation } from "react-router-dom";
 import type { PostData } from "../util/types";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
+import logger from "../utils/logger";
 
 const Post = ({
   username,
@@ -35,6 +36,15 @@ const Post = ({
     const newIsLiked = !isLiked;
     const newLikeCount = likeCount + (newIsLiked ? 1 : -1);
 
+    // Log the like action
+    logger.info("User toggled post like", {
+      postId: id,
+      newIsLiked,
+      previousLikeCount: likeCount,
+      newLikeCount,
+      username: display_name,
+    });
+
     // Optimistic update
     setIsLiked(newIsLiked);
     setLikeCount(newLikeCount);
@@ -42,11 +52,21 @@ const Post = ({
     try {
       if (newIsLiked) {
         await likePost(id);
+        logger.info("Post like API call successful", { postId: id });
       } else {
         await removeLikePost(id);
+        logger.info("Post unlike API call successful", { postId: id });
       }
     } catch (err) {
-      console.error("API call failed:", err);
+      logger.error(
+        "Post like/unlike API call failed",
+        {
+          postId: id,
+          action: newIsLiked ? "like" : "unlike",
+        },
+        err instanceof Error ? err : undefined
+      );
+
       // Revert on error
       setIsLiked(isLiked);
       setLikeCount(likeCount);
@@ -55,12 +75,19 @@ const Post = ({
 
   const homePage = location.pathname === `/`;
   const commentPage = location.pathname.startsWith("/comment/");
+
   return (
     <>
       {homePage && (
         <Link
           className={`border-2 rounded-2xl p-2 ${borderColor} w-full hover:bg-gray-500/20`}
           to={`/post/${id}`}
+          onClick={() => {
+            logger.info("User clicked on post to view details", {
+              postId: id,
+              username: display_name,
+            });
+          }}
         >
           <div className="flex flex-row items-start space-x-2">
             <div className="flex-shrink-0 relative z-10">
@@ -93,6 +120,13 @@ const Post = ({
                       if (isLoggedIn) {
                         handleToggleLike();
                       } else {
+                        logger.info(
+                          "Unauthenticated user attempted to like post",
+                          {
+                            postId: id,
+                            username: display_name,
+                          }
+                        );
                         openLogin("login");
                       }
                     }}
@@ -113,6 +147,10 @@ const Post = ({
           style={{}}
           onClick={() => {
             if (commentPage) {
+              logger.info("User clicked on comment to view post", {
+                postId: id,
+                username: display_name,
+              });
               navigate(`/post/${id}`);
             }
           }}
@@ -150,6 +188,13 @@ const Post = ({
                       if (isLoggedIn) {
                         handleToggleLike();
                       } else {
+                        logger.info(
+                          "Unauthenticated user attempted to like post",
+                          {
+                            postId: id,
+                            username: display_name,
+                          }
+                        );
                         openLogin("login");
                       }
                     }}

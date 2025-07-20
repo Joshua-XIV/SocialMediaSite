@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { getUserInfo } from "../api/user";
+import logger from "../utils/logger";
 
 interface AuthContextType {
   isLoggedIn: boolean | null;
@@ -24,6 +25,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [avatarColor, setAvatarColor] = useState("");
 
   useEffect(() => {
+    logger.info("Checking authentication status");
+
     fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/auth/check`, {
       credentials: "include",
     })
@@ -31,23 +34,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const ok = res.status === 200;
         setIsLoggedIn(ok);
         localStorage.setItem("isLoggedIn", ok ? "true" : "false");
+
+        logger.info("Authentication check completed", {
+          isLoggedIn: ok,
+          statusCode: res.status,
+        });
       })
-      .catch(() => {
+      .catch((err) => {
+        logger.error(
+          "Authentication check failed",
+          {
+            error: err.message,
+          },
+          err
+        );
         setIsLoggedIn(false);
         localStorage.removeItem("isLoggedIn");
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        setIsLoading(false);
+        logger.info("Authentication loading completed");
+      });
   }, []);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
+      if (!isLoggedIn) return;
+
+      logger.info("Fetching user information");
+
       try {
         const res = await getUserInfo();
         setDisplayName(res.display_name);
         setUsername(res.username);
         setAvatarColor(res.avatar_color);
+
+        logger.info("User information fetched successfully", {
+          username: res.username,
+          displayName: res.display_name,
+        });
       } catch (err) {
-        console.error("Failed to fetch user: ", err);
+        logger.error(
+          "Failed to fetch user information",
+          {
+            error: err instanceof Error ? err.message : "Unknown error",
+          },
+          err instanceof Error ? err : undefined
+        );
       }
     };
 

@@ -3,6 +3,7 @@ import { getHomePosts } from "../api/post";
 import Post from "./Post";
 import type { PostData } from "../util/types";
 import { useThemeStyles } from "../hooks/useThemeStyles";
+import logger from "../utils/logger";
 
 const MAX_POST_LIMIT = 10;
 
@@ -16,7 +17,15 @@ const PostFeed = () => {
 
   const fetchPost = useCallback(async () => {
     if (!hasMore) return;
+
+    const startTime = Date.now();
     setIsFetching(true);
+
+    logger.info("Fetching posts", {
+      offset,
+      limit: MAX_POST_LIMIT,
+    });
+
     try {
       const newPosts = await getHomePosts(MAX_POST_LIMIT, offset);
       setPosts((prev) => {
@@ -27,12 +36,27 @@ const PostFeed = () => {
         return [...prev, ...uniqueNewPosts];
       });
       setHasMore(newPosts.length === MAX_POST_LIMIT);
+
+      logger.info("Posts fetched successfully", {
+        newPostsCount: newPosts.length,
+        totalPostsCount: posts.length + newPosts.length,
+        hasMore: newPosts.length === MAX_POST_LIMIT,
+        duration: Date.now() - startTime,
+      });
     } catch (err) {
-      console.error("Failed to load posts", err);
+      logger.error(
+        "Failed to load posts",
+        {
+          offset,
+          limit: MAX_POST_LIMIT,
+          duration: Date.now() - startTime,
+        },
+        err instanceof Error ? err : undefined
+      );
     } finally {
       setIsFetching(false);
     }
-  }, [offset, hasMore, isFetching]);
+  }, [offset, hasMore, isFetching, posts.length]);
 
   useEffect(() => {
     fetchPost();
@@ -42,6 +66,10 @@ const PostFeed = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isFetching) {
+          logger.info("Loading more posts via intersection observer", {
+            currentOffset: offset,
+            newOffset: offset + MAX_POST_LIMIT,
+          });
           setOffset((prev) => prev + MAX_POST_LIMIT);
         }
       },
@@ -54,7 +82,7 @@ const PostFeed = () => {
     return () => {
       if (currentLoader) observer.unobserve(currentLoader);
     };
-  }, [hasMore, isFetching]);
+  }, [hasMore, isFetching, offset]);
 
   return (
     <div className="flex flex-col px-3 w-full h-[calc(100vh-3rem)]">
