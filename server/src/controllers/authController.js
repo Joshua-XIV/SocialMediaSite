@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import HttpError from '../utils/errorUtils.js'
 import bcrypt from 'bcrypt';
 import { sendVerificationEmail } from '../utils/emailUtils.js';
+import logger from '../utils/logger.js';
 
 const saltRounds = 10;
 
@@ -17,7 +18,13 @@ const getRandomAvatarColor = () => {
 };
 
 export const createUser = async(req, res, next) => {
+  const startTime = Date.now();
+  
   if (!req.body) {
+    logger.warn('User registration attempt with missing body', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
     return next(new HttpError('Request body is missing', 400));
   }
 
@@ -36,6 +43,11 @@ export const createUser = async(req, res, next) => {
   if (password.length > 64) return next(new HttpError("Password can't be longer than 64 characters", 400));
 
   if (missingField.length > 0) {
+    logger.warn('User registration attempt with missing fields', {
+      missingFields: missingField,
+      ip: req.ip,
+      email: email
+    });
     return next(new HttpError(`Missing required fields: ${missingField.join(", ")}`, 400));
   }
 
@@ -46,6 +58,10 @@ export const createUser = async(req, res, next) => {
       [username.toLowerCase()]
     );
     if (usernameTaken.rows.length > 0) {
+      logger.warn('User registration attempt with taken username', {
+        username: username.toLowerCase(),
+        ip: req.ip
+      });
       return next(new HttpError("Username Taken", 409));
     }
 
@@ -55,6 +71,10 @@ export const createUser = async(req, res, next) => {
       [email]
     );
     if (emailTaken.rows.length > 0) {
+      logger.warn('User registration attempt with taken email', {
+        email: email,
+        ip: req.ip
+      });
       return next(new HttpError("Email Taken", 409));
     }
 
@@ -70,6 +90,14 @@ export const createUser = async(req, res, next) => {
 
     await sendVerificationEmail(email, verificationCode, 'signup');
 
+    logger.info('User registration initiated successfully', {
+      username: username.toLowerCase(),
+      email: email,
+      displayName: display_name,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    });
+
     res.status(201).json({
       message: "Verification code sent to your email",
       username,
@@ -78,17 +106,34 @@ export const createUser = async(req, res, next) => {
       avatar_color
     });
   } catch (err) {
-    console.log("Error: ", err);
+    logger.error('User registration failed', {
+      username: username?.toLowerCase(),
+      email: email,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    }, err);
     next(new HttpError("Something went wrong", 500));
   }
 };
 
 export const loginUser = async (req, res, next) => {
+  const startTime = Date.now();
   const { emailOrUsername, password } = req.body;
 
-  if (!req.body) return res.status(400).json({error : "Request body is missing"})
+  if (!req.body) {
+    logger.warn('Login attempt with missing body', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    return res.status(400).json({error : "Request body is missing"})
+  }
 
   if (!emailOrUsername || !password) {
+    logger.warn('Login attempt with missing credentials', {
+      ip: req.ip,
+      hasEmailOrUsername: !!emailOrUsername,
+      hasPassword: !!password
+    });
     return next(new HttpError("Missing Fields(s)", 403));
   }
 
@@ -99,6 +144,11 @@ export const loginUser = async (req, res, next) => {
     );
 
     if (userResult.rows.length === 0) {
+          logger.warn('Login attempt with non-existent user', {
+      emailOrUsername: emailOrUsername.toLowerCase(),
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
       return next(new HttpError("Invalid Credentials", 401))
     }
 
@@ -106,6 +156,12 @@ export const loginUser = async (req, res, next) => {
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatch) {
+          logger.warn('Login attempt with incorrect password', {
+      userId: user.id,
+      username: user.username,
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
       return next(new HttpError("Invalid Credentials", 401))
     }
 
@@ -117,19 +173,38 @@ export const loginUser = async (req, res, next) => {
       [verificationCode, expiresAt, user.id]
     );
     await sendVerificationEmail(user.email, verificationCode, 'login');
+    
+    logger.info('Login verification code sent', {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    });
+    
     return res.status(200).json({
       message: "Verification code sent to your email. Please verify to complete login.",
       requiresVerification: true,
       email: user.email
     });
   } catch (err) {
+    logger.error('Login process failed', {
+      emailOrUsername: emailOrUsername?.toLowerCase(),
+      ip: req.ip,
+      duration: Date.now() - startTime
+    }, err);
     return next(new HttpError("Internal Server Error", 500));
   }
 };
 
 export const refreshTokenHandler = async (req, res, next) => {
   const token = req.cookies.refreshToken;
-  if (!token) return next(new HttpError("No Token Provided", 401));
+  if (!token) {
+    logger.warn('Refresh token attempt without token', {
+      ip: req.ip
+    });
+    return next(new HttpError("No Token Provided", 401));
+  }
 
   // Check for refresh token to give access token 
   try {
@@ -140,28 +215,68 @@ export const refreshTokenHandler = async (req, res, next) => {
       [token, payload.id]
     );
 
-    if (result.rows.length === 0) return next(new HttpError("Invalid Token", 403));
+    if (result.rows.length === 0) {
+      logger.warn('Invalid refresh token used', {
+        userId: payload.id,
+        ip: req.ip
+      });
+      return next(new HttpError("Invalid Token", 403));
+    }
 
     const newAccessToken = generateAccessToken({ id: payload.id, username: payload.username});
     setAuthCookies(res, newAccessToken);
+    
+    // Only log in development
+    if (process.env.NODE_ENV !== 'production') {
+      logger.info('Token refreshed successfully', {
+        userId: payload.id,
+        username: payload.username,
+        ip: req.ip
+      });
+    }
+    
     return res.json({ accessToken: newAccessToken });
   } catch (err) {
+    logger.error('Token refresh failed', {
+      ip: req.ip
+    }, err);
     return next(new HttpError("Invalid or Expired Token", 403));
   }
 }
 
 export const logoutUser = async (req, res) => {
-  // Clear all tokens from cookies
   const token = req.cookies.refreshToken;
-  await db.query(`DELETE FROM refresh_token WHERE token = $1`, [token]);
-  clearAuthCookies(res);
-  res.sendStatus(204);
+  const userId = req.user?.id;
+  
+  try {
+    await db.query(`DELETE FROM refresh_token WHERE token = $1`, [token]);
+    clearAuthCookies(res);
+    
+    logger.info('User logged out successfully', {
+      userId: userId,
+      ip: req.ip
+    });
+    
+    res.sendStatus(204);
+  } catch (err) {
+    logger.error('Logout failed', {
+      userId: userId,
+      ip: req.ip
+    }, err);
+    res.sendStatus(204);
+  }
 }
 
 export const verifyCode = async (req, res, next) => {
+  const startTime = Date.now();
   const { email, code } = req.body;
 
   if (!email || !code) {
+    logger.warn('Verification attempt with missing data', {
+      hasEmail: !!email,
+      hasCode: !!code,
+      ip: req.ip
+    });
     return next(new HttpError("Missing email or code", 400));
   }
 
@@ -190,6 +305,15 @@ export const verifyCode = async (req, res, next) => {
         [refreshToken, user.id]
       );
       setAuthCookies(res, accessToken, refreshToken);
+      
+      logger.info('User registration completed successfully', {
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        ip: req.ip,
+        duration: Date.now() - startTime
+      });
+      
       return res.json({
         success: "Email verified and logged in",
         accessToken,
@@ -208,6 +332,10 @@ export const verifyCode = async (req, res, next) => {
       [email, code]
     );
     if (result.rows.length === 0) {
+      logger.warn('Invalid verification code used', {
+        email: email,
+        ip: req.ip
+      });
       return next(new HttpError("Invalid or expired code", 400));
     }
     const user = result.rows[0];
@@ -225,6 +353,16 @@ export const verifyCode = async (req, res, next) => {
       [refreshToken, user.id]
     );
     setAuthCookies(res, accessToken, refreshToken);
+    
+    logger.info('User login completed successfully', {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      duration: Date.now() - startTime
+    });
+    
     res.json({
       success: "Email verified and logged in",
       accessToken,
@@ -237,13 +375,23 @@ export const verifyCode = async (req, res, next) => {
       }
     });
   } catch (err) {
+    logger.error('Verification process failed', {
+      email: email,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    }, err);
     next(new HttpError("Something went wrong during verification", 500));
   }
 };
 
 export const resendVerificationCode = async (req, res, next) => {
   const { email } = req.body;
-  if (!email) return next(new HttpError("Missing email", 400));
+  if (!email) {
+    logger.warn('Resend code attempt without email', {
+      ip: req.ip
+    });
+    return next(new HttpError("Missing email", 400));
+  }
 
   try {
     // First check pending_user for signup verification
@@ -253,7 +401,6 @@ export const resendVerificationCode = async (req, res, next) => {
     );
     
     if (result.rows.length > 0) {
-      // User is in pending_user (signup verification)
       const pending = result.rows[0];
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -263,9 +410,15 @@ export const resendVerificationCode = async (req, res, next) => {
         [verificationCode, expiresAt, pending.id]
       );
       await sendVerificationEmail(email, verificationCode, 'signup');
+      
+      logger.info('Verification code resent for pending user', {
+        email: email,
+        ip: req.ip
+      });
+      
       return res.json({ message: "Verification code resent" });
     }
-
+    
     // Check user table for login verification
     result = await db.query(
       `SELECT * FROM "user" WHERE email = $1`,
@@ -273,6 +426,10 @@ export const resendVerificationCode = async (req, res, next) => {
     );
     
     if (result.rows.length === 0) {
+      logger.warn('Resend code attempt for non-existent user', {
+        email: email,
+        ip: req.ip
+      });
       return next(new HttpError("User not found", 404));
     }
     
@@ -285,8 +442,19 @@ export const resendVerificationCode = async (req, res, next) => {
       [verificationCode, expiresAt, user.id]
     );
     await sendVerificationEmail(email, verificationCode, 'login');
+    
+    logger.info('Verification code resent for existing user', {
+      userId: user.id,
+      email: email,
+      ip: req.ip
+    });
+    
     res.json({ message: "Verification code resent" });
   } catch (err) {
+    logger.error('Resend verification code failed', {
+      email: email,
+      ip: req.ip
+    }, err);
     next(new HttpError("Failed to resend verification code", 500));
   }
 };
