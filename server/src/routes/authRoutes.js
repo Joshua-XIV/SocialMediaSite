@@ -36,7 +36,7 @@ const router = express.Router()
 
 router.post('/login', authLimiter, loginUser)
 router.post('/register', createUser)
-router.post('/logout', logoutUser)
+router.post('/logout', authenticate, logoutUser)
 router.post('/refresh', refreshTokenHandler)
 router.post('/verify', verifyLimiter, verifyCode)
 router.post('/resend-code', resendLimiter, resendVerificationCode)
