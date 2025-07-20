@@ -40,14 +40,17 @@ const MainLayout = () => {
     } else {
       setSideBarOpen(true);
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <Background />
       {!isLoading && (
         <>
-          <NavBar isMobile={isMobile} openSideBar={() => setSideBarOpen((prev) => !prev)}/>
+          <NavBar
+            isMobile={isMobile}
+            openSideBar={() => setSideBarOpen((prev) => !prev)}
+          />
           <div className="pt-[3em] flex">
             {
               <SideBar
@@ -59,14 +62,21 @@ const MainLayout = () => {
             <div
               className="flex justify-center w-full h-full"
               style={{
-                paddingLeft: !isMobile ? (sideBarOpen ? "16rem" : "4rem") : undefined,
+                paddingLeft: !isMobile
+                  ? sideBarOpen
+                    ? "16rem"
+                    : "4rem"
+                  : undefined,
                 transition: "padding-left 0.5s ease",
               }}
             >
-              <div className="w-full max-w-4xl"><Outlet/></div>
+              <div className="w-full max-w-4xl">
+                <Outlet />
+              </div>
             </div>
           </div>
-        </>)}
+        </>
+      )}
     </ThemeContext.Provider>
   );
 };
