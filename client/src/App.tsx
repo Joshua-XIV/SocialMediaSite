@@ -7,6 +7,7 @@ import CommentPage from "./pages/CommentPage.tsx";
 import JobPage from "./pages/JobPage.tsx";
 import CreateJobPage from "./pages/CreateJobPage.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
+import PublicUserPage from "./pages/PublicUserPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: "/jobs", element: <JobPage /> },
       { path: "/jobs/create", element: <CreateJobPage /> },
       { path: "/search", element: <SearchPage /> },
+      { path: "/user/:username", element: <PublicUserPage /> },
     ],
   },
 ]);

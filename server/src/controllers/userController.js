@@ -54,3 +54,32 @@ export const updateAvatarColor = async (req, res, next) => {
     return next(new HttpError("Internal Server Error", 500));
   }
 };
+
+export const getUserByUsername = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+
+    if (!username) {
+      return next(new HttpError("Username is required", 400));
+    }
+
+    const result = await db.query(
+      `SELECT username, display_name, avatar_color, created_at FROM "user" WHERE username = $1`,
+      [username.toLowerCase()]
+    );
+
+    if (result.rows.length === 0) {
+      return next(new HttpError("User not found", 404));
+    }
+
+    const user = result.rows[0];
+    return res.status(200).json({
+      username: user.username,
+      display_name: user.display_name,
+      avatar_color: user.avatar_color,
+      created_at: user.created_at,
+    });
+  } catch (err) {
+    return next(new HttpError("Internal Server Error", 500));
+  }
+};
