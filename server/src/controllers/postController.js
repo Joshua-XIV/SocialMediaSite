@@ -180,6 +180,69 @@ export const getPost = async (req, res, next) => {
   }
 };
 
+export const getUserPosts = async(req, res, next) => {
+  const startTime = Date.now();
+  const { username } = req.params;
+  const maxLimit = MAX_POSTS_LIMIT;
+  const limit = Math.min(req.query.limit ? Number(req.query.limit) : maxLimit, maxLimit);
+  const offset = parseInt(req.query.offset) || 0;
+  const userID = req.user?.id || null;
+
+  if (!username) {
+    return next(new HttpError('Username is required', 400));
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT 
+        post.id, 
+        post.content, 
+        post.created_at, 
+        "user".username, 
+        "user".display_name,
+        "user".avatar_color,
+        COUNT(pl_all.user_id) AS total_likes,
+        CASE WHEN pl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+        (
+          SELECT COUNT(*)
+          FROM comment AS replies
+          WHERE replies.post_id = post.id AND replies.is_deleted = false
+        ) AS total_replies
+      FROM post
+      JOIN "user" ON "user".id = post.user_id
+      LEFT JOIN post_like pl_all ON pl_all.post_id = post.id
+      LEFT JOIN post_like pl_user ON pl_user.post_id = post.id AND pl_user.user_id = $4
+      WHERE post.is_deleted = false AND "user".username = $3
+      GROUP BY post.id, "user".username, "user".display_name, "user".avatar_color, pl_user.user_id
+      ORDER BY post.created_at DESC
+      LIMIT $1 OFFSET $2`,
+      [limit, offset, username.toLowerCase(), userID]
+    );
+    
+    logger.info('User posts retrieved successfully', {
+      username: username,
+      userId: userID,
+      limit: limit,
+      offset: offset,
+      postsCount: result.rows.length,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    });
+    
+    res.status(200).json(result.rows);
+  } catch (err) {
+    logger.error('User posts retrieval failed', {
+      username: username,
+      userId: userID,
+      limit: limit,
+      offset: offset,
+      ip: req.ip,
+      duration: Date.now() - startTime
+    }, err);
+    next(new HttpError("Something went wrong", 500));
+  }
+};
+
 export const likePost = async(req, res, next) => {
   const startTime = Date.now();
   const userID = req.user.id;

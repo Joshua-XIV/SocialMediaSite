@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import { useThemeStyles } from "../hooks/useThemeStyles";
+import { getUserPosts } from "../api/post";
+import Post from "../components/Post";
+import type { PostData } from "../util/types";
 
 interface UserData {
   username: string;
@@ -13,10 +16,13 @@ interface UserData {
 const PublicUserPage = () => {
   const { username } = useParams<{ username: string }>();
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { textColor } = useThemeStyles();
-  const errorColor = 'text-red-500';
+  const [postsError, setPostsError] = useState<string | null>(null);
+  const { textColor, bgColor, borderColor } = useThemeStyles();
+  const errorColor = "text-red-500";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -52,6 +58,27 @@ const PublicUserPage = () => {
     fetchUserData();
   }, [username]);
 
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!username || !userData) return;
+
+      try {
+        setPostsLoading(true);
+        setPostsError(null);
+        const postsData = await getUserPosts(username, 10, 0);
+        setPosts(postsData);
+      } catch (err) {
+        setPostsError("Failed to load posts");
+      } finally {
+        setPostsLoading(false);
+      }
+    };
+
+    if (userData) {
+      fetchUserPosts();
+    }
+  }, [username, userData]);
+
   if (loading) {
     return <div className={`${textColor} text-center`}>Loading...</div>;
   }
@@ -85,9 +112,33 @@ const PublicUserPage = () => {
         )}
       </div>
 
-      {/* TODO: Add user's posts here */}
-      <div className="text-center text-gray-500">
-        <p>Posts will appear here</p>
+      {/* User's Posts */}
+      <div className="space-y-4">
+        {postsLoading && (
+          <div className={`${textColor} text-center`}>Loading posts...</div>
+        )}
+
+        {postsError && (
+          <div className={`${errorColor} text-center`}>{postsError}</div>
+        )}
+
+        {!postsLoading && !postsError && posts.length === 0 && (
+          <div className={`${textColor} text-center text-gray-500`}>
+            No posts yet
+          </div>
+        )}
+
+        <div className={`${borderColor} border-1`}>
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              style={{ backgroundColor: bgColor }}
+              className="flex w-full"
+            >
+              <Post {...post} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

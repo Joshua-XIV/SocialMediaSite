@@ -77,3 +77,19 @@ export async function removeLikePost(postID: string | number) {
 
   return res.json();
 }
+
+export async function getUserPosts(username: string, limit: number, offset: number) {
+  const cappedLimit = Math.min(limit, 10);
+  const res = await fetch(`${API_URL}/api/posts/user/${username}?limit=${cappedLimit}&offset=${offset}`, {
+    method: 'GET',
+    headers: { "Content-Type" : "application/json" },
+    credentials: "include",
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Something went wrong");
+  }
+
+  return res.json();
+}
