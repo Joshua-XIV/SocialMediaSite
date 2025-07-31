@@ -74,7 +74,7 @@ const Post = ({
   };
 
   const homePage = location.pathname === `/`;
-  const commentPage = location.pathname.startsWith("/comment/");
+  const commentPage = location.pathname.startsWith("/comment/") || location.pathname.startsWith("/user/");
 
   return (
     <>
