@@ -5,9 +5,8 @@ import { likePost, removeLikePost } from "../api/post";
 import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { PostData } from "../util/types";
-import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import logger from "../utils/logger";
 
@@ -74,7 +73,9 @@ const Post = ({
   };
 
   const homePage = location.pathname === `/`;
-  const commentPage = location.pathname.startsWith("/comment/") || location.pathname.startsWith("/user/");
+  const commentPage =
+    location.pathname.startsWith("/comment/") ||
+    location.pathname.startsWith("/user/");
 
   return (
     <>
@@ -99,10 +100,23 @@ const Post = ({
             </div>
             <section className="flex-1 min-w-0">
               <div className={`${textColor} flex items-center gap-x-2`}>
-                <p className="text-md font-bold">{`${display_name}`}</p>
-                <p className="text-sm">{`@${username} ${formatTimeShort(
-                  created_at
-                )}`}</p>
+                <Link
+                  to={`/user/${username}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-md font-bold hover:underline"
+                >
+                  {display_name}
+                </Link>
+                <div className="text-sm">
+                  <Link
+                    to={`/user/${username}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:underline"
+                  >
+                    @{username}
+                  </Link>
+                  <span> {formatTimeShort(created_at)}</span>
+                </div>
               </div>
               <div className={`text-md mt-2 ${postTextColor} break-words`}>
                 {content}
@@ -165,10 +179,23 @@ const Post = ({
             </div>
             <section className="flex-1 min-w-0">
               <div className={`${textColor} flex items-center gap-x-2`}>
-                <p className="text-md font-bold">{`${display_name}`}</p>
-                <p className="text-sm">{`@${username} ${formatTimeShort(
-                  created_at
-                )}`}</p>
+                <Link
+                  to={`/user/${username}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-md font-bold hover:underline"
+                >
+                  {display_name}
+                </Link>
+                <div className="text-sm">
+                  <Link
+                    to={`/user/${username}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:underline"
+                  >
+                    @{username}
+                  </Link>
+                  <span> {formatTimeShort(created_at)}</span>
+                </div>
               </div>
               <div className={`text-md mt-2 ${postTextColor} break-words`}>
                 {content}

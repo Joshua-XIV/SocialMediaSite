@@ -71,10 +71,23 @@ const Comment = ({
               </div>
               <section className="flex-1 min-w-0">
                 <div className={`${textColor} flex items-center gap-x-2`}>
-                  <p className="text-md font-bold">{`${display_name}`}</p>
-                  <p className="text-sm">{`@${username} ${formatTimeShort(
-                    created_at
-                  )}`}</p>
+                  <Link
+                    to={`/user/${username}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-md font-bold hover:underline"
+                  >
+                    {display_name}
+                  </Link>
+                  <div className="text-sm">
+                    <Link
+                      to={`/user/${username}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hover:underline"
+                    >
+                      @{username}
+                    </Link>
+                    <span> {formatTimeShort(created_at)}</span>
+                  </div>
                 </div>
                 <div className={`text-md mt-2 ${postTextColor} break-words`}>
                   {content}
