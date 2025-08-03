@@ -106,3 +106,22 @@ export async function getCommentThread (commentID: string | number) {
 
   return res.json();
 }
+
+export async function getUserReplies(username: string, limit: number = 10, offset: number = 0) {
+  const params = new URLSearchParams();
+  if (limit) params.append("limit", limit.toString());
+  if (offset) params.append("offset", offset.toString());
+
+  const res = await fetch(`${API_URL}/api/comments/user/${username}?${params.toString()}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const { error } = await res.json();
+    throw new Error(error || "Failed to get user replies");
+  }
+
+  return res.json();
+}
