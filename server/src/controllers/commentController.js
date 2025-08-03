@@ -269,3 +269,52 @@ export const getCommentThread = async (req, res, next) => {
     return next(new HttpError("Failed to fetch comment thread", 500));
   }
 }
+
+export const getUserReplies = async (req, res, next) => {
+  const username = req.params.username;
+  const userID = req.user?.id || null;
+  const limit = Math.min(parseInt(req.query.limit) || MAX_COMMENTS_LIMIT, MAX_COMMENTS_LIMIT);
+  const offset = parseInt(req.query.offset) || 0;
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        c.id,
+        c.content,
+        c.created_at,
+        c.parent_id,
+        c.post_id,
+        u.username,
+        u.display_name,
+        u.avatar_color,
+        COUNT(cl_all.user_id) AS total_likes,
+        CASE WHEN cl_user.user_id IS NOT NULL THEN true ELSE false END AS liked,
+        (
+          SELECT COUNT(*) 
+          FROM comment AS replies 
+          WHERE replies.parent_id = c.id AND replies.is_deleted = false
+        ) AS total_replies,
+        p.content AS post_content,
+        p.created_at AS post_created_at,
+        parent_comment.content AS parent_comment_content,
+        parent_user.username AS parent_username,
+        parent_user.display_name AS parent_display_name
+      FROM comment c
+      JOIN "user" u ON u.id = c.user_id
+      LEFT JOIN comment_like cl_all ON cl_all.comment_id = c.id
+      LEFT JOIN comment_like cl_user ON cl_user.comment_id = c.id AND cl_user.user_id = $2
+      LEFT JOIN post p ON p.id = c.post_id
+      LEFT JOIN comment parent_comment ON parent_comment.id = c.parent_id
+      LEFT JOIN "user" parent_user ON parent_user.id = parent_comment.user_id
+      WHERE u.username = $1 AND c.is_deleted = false
+      GROUP BY c.id, u.username, u.display_name, u.avatar_color, cl_user.user_id, p.content, p.created_at, parent_comment.content, parent_user.username, parent_user.display_name
+      ORDER BY c.created_at DESC
+      LIMIT $3 OFFSET $4
+    `, [username, userID, limit, offset]);
+
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("DB Error:", err.message);
+    return next(new HttpError("Failed to fetch user replies", 500));
+  }
+};
