@@ -16,6 +16,7 @@ export const userInfo = async (req, res, next) => {
 
     const user = result.rows[0];
     return res.status(200).json({
+      id: userId,
       username: user.username,
       display_name: user.display_name,
       avatar_color: user.avatar_color,
