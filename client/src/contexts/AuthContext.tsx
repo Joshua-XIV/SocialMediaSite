@@ -7,9 +7,11 @@ interface AuthContextType {
   isLoggedIn: boolean | null;
   setIsLoggedIn: (val: boolean) => void;
   isLoading: boolean;
+  id: number | null;
   username: string | null;
   displayName: string | null;
   avatarColor: string | null;
+  setId: (val: number) => void;
   setUsername: (val: string) => void;
   setDisplayName: (val: string) => void;
   setAvatarColor: (val: string) => void;
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [id, setId] = useState<number | null>(null);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarColor, setAvatarColor] = useState("");
@@ -65,11 +68,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const res = await getUserInfo();
+        setId(res.id);
         setDisplayName(res.display_name);
         setUsername(res.username);
         setAvatarColor(res.avatar_color);
 
         logger.info("User information fetched successfully", {
+          id: res.id,
           username: res.username,
           displayName: res.display_name,
         });
@@ -93,7 +98,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isLoggedIn,
         setIsLoggedIn,
         isLoading,
+        id,
         username,
+        setId,
         setUsername,
         displayName,
         setDisplayName,
