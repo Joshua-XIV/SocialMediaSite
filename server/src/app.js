@@ -8,6 +8,7 @@ import jobRoutes from './routes/jobRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import logRoutes from './routes/logRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 import loggerMiddleware from './middleware/logger.js';
 import errorHandler from './middleware/error.js';
 import dotenv from 'dotenv';
@@ -32,6 +33,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.use(errorHandler);
 
