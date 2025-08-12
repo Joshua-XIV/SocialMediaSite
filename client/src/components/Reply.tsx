@@ -9,7 +9,18 @@ import type { CommentData } from "../util/types";
 import { likeComment, removeLikeComment } from "../api/comment";
 import Avatar from "./Avatar";
 
-interface ReplyData extends CommentData {
+interface ReplyData {
+  id: number;
+  content: string;
+  created_at: string;
+  parent_id: number | null;
+  post_id: number;
+  username: string;
+  display_name: string;
+  avatar_color: string;
+  liked: boolean;
+  total_likes: number;
+  total_replies: number;
   post_content?: string;
   post_created_at?: string;
   parent_comment_content?: string;
