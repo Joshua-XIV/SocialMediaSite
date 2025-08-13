@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import { useThemeStyles } from "../hooks/useThemeStyles";
@@ -130,13 +130,20 @@ const PublicUserPage = () => {
     }
   }, [username, userData]);
 
-  const loadMorePosts = async () => {
+  const loadMorePosts = useCallback(async () => {
     if (!username || postsLoadingMore || !hasMorePosts) return;
 
     try {
       setPostsLoadingMore(true);
       const postsData = await getUserPosts(username, 10, postsOffset);
-      setPosts((prev) => [...prev, ...postsData]);
+      setPosts((prev) => {
+        // Filter out any posts that already exist to prevent duplicates
+        const existingIds = new Set(prev.map((post: PostData) => post.id));
+        const newPosts = postsData.filter(
+          (post: PostData) => !existingIds.has(post.id)
+        );
+        return [...prev, ...newPosts];
+      });
       setPostsOffset((prev) => prev + 10);
       setHasMorePosts(postsData.length === 10);
     } catch (err) {
@@ -144,15 +151,22 @@ const PublicUserPage = () => {
     } finally {
       setPostsLoadingMore(false);
     }
-  };
+  }, [username, postsLoadingMore, hasMorePosts, postsOffset]);
 
-  const loadMoreReplies = async () => {
+  const loadMoreReplies = useCallback(async () => {
     if (!username || repliesLoadingMore || !hasMoreReplies) return;
 
     try {
       setRepliesLoadingMore(true);
       const repliesData = await getUserReplies(username, 10, repliesOffset);
-      setReplies((prev) => [...prev, ...repliesData]);
+      setReplies((prev) => {
+        // Filter out any replies that already exist to prevent duplicates
+        const existingIds = new Set(prev.map((reply: ReplyData) => reply.id));
+        const newReplies = repliesData.filter(
+          (reply: ReplyData) => !existingIds.has(reply.id)
+        );
+        return [...prev, ...newReplies];
+      });
       setRepliesOffset((prev) => prev + 10);
       setHasMoreReplies(repliesData.length === 10);
     } catch (err) {
@@ -160,7 +174,7 @@ const PublicUserPage = () => {
     } finally {
       setRepliesLoadingMore(false);
     }
-  };
+  }, [username, repliesLoadingMore, hasMoreReplies, repliesOffset]);
 
   // Intersection observer for infinite scroll
   const postsObserver = useCallback(
