@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import { useThemeStyles } from "../hooks/useThemeStyles";
@@ -54,10 +54,6 @@ const PublicUserPage = () => {
   const [repliesError, setRepliesError] = useState<string | null>(null);
   const { textColor, bgColor, borderColor } = useThemeStyles();
   const errorColor = "text-red-500";
-
-  // Refs for intersection observer
-  const postsEndRef = useRef<HTMLDivElement>(null);
-  const repliesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {

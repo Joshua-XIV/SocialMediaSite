@@ -5,7 +5,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useModal } from "../contexts/ModalContext";
 import { FiHeart } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
-import type { CommentData } from "../util/types";
 import { likeComment, removeLikeComment } from "../api/comment";
 import Avatar from "./Avatar";
 
@@ -39,10 +38,10 @@ const Reply = ({
   total_likes,
   total_replies,
   post_content,
-  post_created_at,
-  parent_comment_content,
+  //post_created_at,
+  //parent_comment_content,
   parent_username,
-  parent_display_name,
+  //parent_display_name,
 }: ReplyData) => {
   const { textColor, postTextColor, borderColor } = useThemeStyles();
   const [isLiked, setIsLiked] = useState(liked);

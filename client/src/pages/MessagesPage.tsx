@@ -17,7 +17,7 @@ import Message from "../components/Message";
 import Avatar from "../components/Avatar";
 
 const MessagesPage = () => {
-  const { textColor, bgColor, borderColor, inputColor } = useThemeStyles();
+  const { textColor, borderColor, inputColor } = useThemeStyles();
   const [conversations, setConversations] = useState<ConversationData[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<ConversationData | null>(null);
