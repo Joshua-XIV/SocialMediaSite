@@ -2,6 +2,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 import { logout } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 import CogButton from "./CogButton";
 import SunImage from "../assets/sun.svg";
 import MoonImage from "../assets/moon.svg";
@@ -16,13 +17,15 @@ interface CogWindowProps {
 const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
   const { theme, setTheme } = useTheme();
   const { bgColor, textColor } = useThemeStyles();
+  const navigate = useNavigate();
   const {
     isLoggedIn,
     setIsLoggedIn,
     setUsername,
     setDisplayName,
     avatarColor,
-    setAvatarColor
+    setAvatarColor,
+    username,
   } = useAuth();
 
   const toggleTheme = () => {
@@ -48,7 +51,7 @@ const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
         console.error('Failed to update avatar color:', error);
       }
     }
-  };  
+  };
 
   return (
     <div
@@ -64,11 +67,21 @@ const CogWindow = ({ openLogin, closeWindow }: CogWindowProps) => {
           text="Login/Sign-Up"
         />
       )}
-      {isLoggedIn && <CogButton onClick={() => ""} text="View Profile" />}
+      {isLoggedIn && (
+        <CogButton
+          onClick={() => {
+            if (username) {
+              navigate(`/user/${username}`);
+              closeWindow();
+            }
+          }}
+          text="View Profile"
+        />
+      )}
       {isLoggedIn && (
         <div>
           <AvatarUnifiedPickerWheel
-            currentColor={avatarColor || '#3B82F6'}
+            currentColor={avatarColor || "#3B82F6"}
             onColorChange={handleColorChange}
           />
         </div>
