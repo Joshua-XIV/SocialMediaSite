@@ -15,9 +15,13 @@ import type {
 import ConversationItem from "../components/ConversationItem";
 import Message from "../components/Message";
 import Avatar from "../components/Avatar";
+import { useAuth } from "../contexts/AuthContext";
+import { useModal } from "../contexts/ModalContext";
 
 const MessagesPage = () => {
   const { textColor, borderColor, inputColor } = useThemeStyles();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const { openLogin } = useModal();
   const [conversations, setConversations] = useState<ConversationData[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<ConversationData | null>(null);
@@ -36,10 +40,15 @@ const MessagesPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch conversations on mount
+  // Fetch conversations when authenticated
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (authLoading) return;
+    if (isLoggedIn) {
+      fetchConversations();
+    } else {
+      setLoading(false);
+    }
+  }, [authLoading, isLoggedIn]);
 
   // Fetch messages when conversation is selected
   useEffect(() => {
@@ -177,10 +186,37 @@ const MessagesPage = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className={`${textColor} text-center p-8`}>
         Loading conversations...
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="max-w-3xl mx-auto h-[calc(100vh-3em)] flex items-center justify-center">
+        <div className={`text-center ${textColor}`}>
+          <h1 className="text-2xl font-bold mb-2">Messages are for members</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            You need to be logged in to view and send messages.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => openLogin("login")}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Log in
+            </button>
+            <button
+              onClick={() => openLogin("signup")}
+              className={`px-4 py-2 border rounded-lg ${borderColor} hover:bg-gray-100 dark:hover:bg-gray-800`}
+            >
+              Sign up
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
