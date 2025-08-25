@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '../middleware/authenticate.js';
-import { userInfo, updateAvatarColor, getUserByUsername, followUser, unfollowUser } from '../controllers/userController.js';
+import { userInfo, updateAvatarColor, getUserByUsername, followUser, unfollowUser, getFollowers, getFollowStats } from '../controllers/userController.js';
  
 const router = express.Router();
 
